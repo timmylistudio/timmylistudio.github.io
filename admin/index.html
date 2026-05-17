@@ -12,45 +12,23 @@
         <p class="kicker">timmylistudio.github.io</p>
         <h1>Homepage Admin</h1>
         <p>
-          Edit the page content, upload a profile picture, and publish changes
-          to GitHub Pages.
+          Sign in with GitHub, edit the homepage content, upload a profile
+          picture, and publish changes to GitHub Pages.
         </p>
       </header>
 
       <section class="panel">
-        <h2>Editor Access</h2>
+        <h2>GitHub OAuth Login</h2>
         <p class="help">
-          Sign in with the admin password to edit and publish this homepage.
-          The publishing service stores the GitHub write access securely outside
-          of this public page.
+          This editor only supports GitHub OAuth login. The OAuth app must be
+          configured on the backend before sign-in can complete.
         </p>
-        <label>
-          Admin password
-          <input id="admin-password" type="password" autocomplete="current-password" placeholder="Enter admin password">
-        </label>
         <div class="actions">
-          <button id="password-login" type="button">Sign in</button>
+          <button id="github-login" type="button">Sign in with GitHub</button>
           <button id="logout" type="button" class="secondary">Sign out</button>
           <button id="load-content" type="button">Load from GitHub</button>
         </div>
         <p id="session-status" class="session-status">Checking login...</p>
-      </section>
-
-      <section class="panel">
-        <h2>Token Fallback</h2>
-        <p class="help">
-          If the password login is unavailable, paste a fine-grained token with
-          Contents read/write access. If you click "Remember token", this
-          browser will keep it for next time.
-        </p>
-        <label>
-          GitHub token
-          <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
-        </label>
-        <div class="actions">
-          <button id="save-token" type="button">Remember token</button>
-          <button id="forget-token" type="button" class="secondary">Forget token</button>
-        </div>
       </section>
 
       <form id="editor" class="panel">

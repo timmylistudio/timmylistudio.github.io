@@ -1,15 +1,13 @@
 const OWNER = "timmylistudio";
 const REPO = "timmylistudio.github.io";
 const BRANCH = "main";
-const API_ROOT = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const AUTH_BASE = (window.HOMEPAGE_ADMIN_CONFIG?.authBaseUrl || "").replace(/\/$/, "");
-const TOKEN_KEY = "timmylistudio-homepage-token";
-const SESSION_KEY = "timmylistudio-admin-session";
 
 let currentContent = null;
 let contentSha = null;
 let uploadedPhotoPath = "";
 let signedIn = false;
+let oauthConfigured = false;
 
 const $ = (selector) => document.querySelector(selector);
 const statusBox = $("#status");
@@ -24,31 +22,10 @@ function setSession(message) {
   sessionStatus.textContent = message;
 }
 
-function setLoginControlsEnabled(enabled) {
-  $("#password-login").disabled = !enabled;
-  $("#logout").disabled = !enabled;
-}
-
 function requireAuthBase() {
   if (!AUTH_BASE) {
-    throw new Error("Admin login is not configured yet. Set authBaseUrl in admin/config.js after deploying the Worker.");
+    throw new Error("GitHub OAuth login is not configured. Set authBaseUrl in admin/config.js.");
   }
-}
-
-function token() {
-  return $("#token")?.value.trim() || "";
-}
-
-function adminSession() {
-  return localStorage.getItem(SESSION_KEY) || "";
-}
-
-function directHeaders() {
-  return {
-    Accept: "application/vnd.github+json",
-    Authorization: `Bearer ${token()}`,
-    "X-GitHub-Api-Version": "2022-11-28"
-  };
 }
 
 function encodeBase64Unicode(value) {
@@ -76,13 +53,11 @@ function slugify(value) {
 
 async function apiFetch(path, options = {}) {
   requireAuthBase();
-  const session = adminSession();
   const response = await fetch(`${AUTH_BASE}${path}`, {
     ...options,
     credentials: "include",
     headers: {
       Accept: "application/json",
-      ...(session ? { Authorization: `Bearer ${session}` } : {}),
       ...(options.headers || {})
     }
   });
@@ -93,42 +68,10 @@ async function apiFetch(path, options = {}) {
 }
 
 async function githubGet(path) {
-  if (!signedIn && token()) {
-    const response = await fetch(`${API_ROOT}/${path}?ref=${BRANCH}`, {
-      headers: directHeaders()
-    });
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}: ${await response.text()}`);
-    }
-    return response.json();
-  }
-
   return apiFetch(`/content?path=${encodeURIComponent(path)}&ref=${encodeURIComponent(BRANCH)}`);
 }
 
 async function githubPut(path, content, message, sha) {
-  if (!signedIn && token()) {
-    const body = {
-      branch: BRANCH,
-      content,
-      message
-    };
-    if (sha) body.sha = sha;
-
-    const response = await fetch(`${API_ROOT}/${path}`, {
-      method: "PUT",
-      headers: {
-        ...directHeaders(),
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    });
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}: ${await response.text()}`);
-    }
-    return response.json();
-  }
-
   return apiFetch(`/content?path=${encodeURIComponent(path)}`, {
     method: "PUT",
     headers: {
@@ -223,58 +166,42 @@ function collectEditor() {
 async function checkSession() {
   if (!AUTH_BASE) {
     signedIn = false;
-    setLoginControlsEnabled(false);
-    setSession("Password login is not configured.");
-    setStatus("Use the token fallback for now.");
+    setSession("GitHub OAuth is not configured.");
+    setStatus("Set the GitHub OAuth App client ID and secret in the Worker before signing in.");
     return;
   }
 
   try {
-    setLoginControlsEnabled(true);
     const session = await apiFetch("/session");
+    oauthConfigured = Boolean(session.oauthConfigured);
     signedIn = Boolean(session.authenticated);
     setSession(signedIn ? `Signed in as ${session.login}.` : "Not signed in.");
+    if (!oauthConfigured) {
+      setStatus("GitHub OAuth App is not configured yet. Add the Client ID and Client Secret to the Worker.");
+    }
   } catch (error) {
     signedIn = false;
     setSession("Not signed in.");
   }
 }
 
-async function passwordLogin() {
-  if (!AUTH_BASE) {
-    setStatus("Password login is not configured.");
-    return;
-  }
-
-  const password = $("#admin-password").value;
-  if (!password) {
-    setStatus("Enter the admin password first.");
+function githubLogin() {
+  if (!oauthConfigured) {
+    setStatus("GitHub OAuth App is not configured yet. Add the Client ID and Client Secret to the Worker.");
     return;
   }
 
   try {
-    setStatus("Signing in...");
-    const result = await apiFetch("/password-login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ password })
-    });
-    if (result.session) {
-      localStorage.setItem(SESSION_KEY, result.session);
-    }
-    $("#admin-password").value = "";
-    await checkSession();
-    await loadContent();
+    requireAuthBase();
+    window.location.href = `${AUTH_BASE}/login?return_to=${encodeURIComponent(window.location.href)}`;
   } catch (error) {
-    setStatus(`Sign in failed:\n${error.message}`);
+    setStatus(error.message);
   }
 }
 
 async function loadContent() {
-  if (!signedIn && !token()) {
-    setStatus("Sign in with GitHub or add a token first, then load content.");
+  if (!signedIn) {
+    setStatus("Sign in with GitHub first, then load content.");
     return;
   }
 
@@ -310,8 +237,8 @@ async function uploadPhotoIfNeeded() {
 
 async function publish(event) {
   event.preventDefault();
-  if (!signedIn && !token()) {
-    setStatus("Sign in with GitHub or add a token first.");
+  if (!signedIn) {
+    setStatus("Sign in with GitHub first.");
     return;
   }
 
@@ -337,29 +264,17 @@ async function publish(event) {
   }
 }
 
-$("#password-login").addEventListener("click", passwordLogin);
+$("#github-login").addEventListener("click", githubLogin);
 
 $("#logout").addEventListener("click", async () => {
   try {
     await apiFetch("/logout", { method: "POST" });
-    localStorage.removeItem(SESSION_KEY);
     signedIn = false;
     setSession("Signed out.");
     setStatus("Signed out.");
   } catch (error) {
     setStatus(`Sign out failed:\n${error.message}`);
   }
-});
-
-$("#save-token").addEventListener("click", () => {
-  localStorage.setItem(TOKEN_KEY, token());
-  setStatus("Token saved in this browser.");
-});
-
-$("#forget-token").addEventListener("click", () => {
-  localStorage.removeItem(TOKEN_KEY);
-  $("#token").value = "";
-  setStatus("Token removed from this browser.");
 });
 
 $("#load-content").addEventListener("click", () => {
@@ -369,11 +284,6 @@ $("#load-content").addEventListener("click", () => {
 $("#add-link").addEventListener("click", () => addLink());
 $("#add-section").addEventListener("click", () => addSection());
 form.addEventListener("submit", publish);
-
-const savedToken = localStorage.getItem(TOKEN_KEY);
-if (savedToken && $("#token")) {
-  $("#token").value = savedToken;
-}
 
 fetch("../content.json", { cache: "no-store" })
   .then((response) => response.json())

@@ -1,5 +1,4 @@
 const COOKIE_NAME = "homepage_admin_session";
-const ADMIN_COOKIE = "homepage_admin_access";
 const STATE_COOKIE = "homepage_admin_state";
 const GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
 const GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
@@ -20,7 +19,7 @@ function corsHeaders(env) {
   return {
     "Access-Control-Allow-Origin": env.ADMIN_ORIGIN,
     "Access-Control-Allow-Credentials": "true",
-    "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization",
+    "Access-Control-Allow-Headers": "Content-Type, Accept",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS"
   };
 }
@@ -42,51 +41,10 @@ function clearCookie(name) {
   return `${name}=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`;
 }
 
-function getBearerToken(request) {
-  const authorization = request.headers.get("Authorization") || "";
-  return authorization.startsWith("Bearer ") ? authorization.slice("Bearer ".length).trim() : "";
-}
-
 function randomState() {
   const bytes = new Uint8Array(24);
   crypto.getRandomValues(bytes);
   return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-function base64Url(buffer) {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-async function signSession(value, env) {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(env.SESSION_SECRET),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
-  return base64Url(signature);
-}
-
-async function createAdminSession(env) {
-  const expires = Date.now() + 1000 * 60 * 60 * 24 * 14;
-  const payload = String(expires);
-  const signature = await signSession(payload, env);
-  return `${payload}.${signature}`;
-}
-
-async function verifyAdminSession(value, env) {
-  if (!value || !env.SESSION_SECRET) return false;
-  const [expires, signature] = value.split(".");
-  if (!expires || !signature || Number(expires) < Date.now()) return false;
-  const expected = await signSession(expires, env);
-  return signature === expected;
 }
 
 async function githubRequest(path, token, options = {}) {
@@ -110,26 +68,6 @@ async function githubRequest(path, token, options = {}) {
 }
 
 async function getSession(request, env) {
-  if (await verifyAdminSession(getBearerToken(request), env)) {
-    if (!env.GITHUB_WRITE_TOKEN) {
-      throw new Error("GITHUB_WRITE_TOKEN secret is not configured.");
-    }
-    return {
-      login: env.ALLOWED_LOGIN || "admin",
-      token: env.GITHUB_WRITE_TOKEN
-    };
-  }
-
-  if (await verifyAdminSession(getCookie(request, ADMIN_COOKIE), env)) {
-    if (!env.GITHUB_WRITE_TOKEN) {
-      throw new Error("GITHUB_WRITE_TOKEN secret is not configured.");
-    }
-    return {
-      login: env.ALLOWED_LOGIN || "admin",
-      token: env.GITHUB_WRITE_TOKEN
-    };
-  }
-
   const token = getCookie(request, COOKIE_NAME);
   if (!token) return null;
 
@@ -144,26 +82,11 @@ async function getSession(request, env) {
   };
 }
 
-async function handlePasswordLogin(request, env) {
-  if (!env.ADMIN_PASSWORD || !env.SESSION_SECRET || !env.GITHUB_WRITE_TOKEN) {
-    return json({ error: "Password login is not configured." }, 500, env);
-  }
-
-  const body = await request.json();
-  if (body.password !== env.ADMIN_PASSWORD) {
-    return json({ error: "Invalid password." }, 401, env);
-  }
-
-  const session = await createAdminSession(env);
-  return json(
-    { ok: true, session },
-    200,
-    env,
-    { "Set-Cookie": setCookie(ADMIN_COOKIE, session, 60 * 60 * 24 * 14) }
-  );
-}
-
 async function handleLogin(request, env) {
+  if (!env.GITHUB_CLIENT_ID) {
+    return new Response("GitHub OAuth client ID is not configured.", { status: 500 });
+  }
+
   const url = new URL(request.url);
   const returnTo = url.searchParams.get("return_to") || env.ADMIN_ORIGIN;
   const state = randomState();
@@ -185,6 +108,10 @@ async function handleLogin(request, env) {
 }
 
 async function handleCallback(request, env) {
+  if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
+    return new Response("GitHub OAuth client ID or secret is not configured.", { status: 500 });
+  }
+
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const stateParam = url.searchParams.get("state") || "";
@@ -273,16 +200,22 @@ export default {
     try {
       if (url.pathname === "/login") return handleLogin(request, env);
       if (url.pathname === "/callback") return handleCallback(request, env);
-      if (url.pathname === "/password-login") return handlePasswordLogin(request, env);
       if (url.pathname === "/session") {
         const session = await getSession(request, env);
-        return json({ authenticated: Boolean(session), login: session?.login || null }, 200, env);
+        return json(
+          {
+            authenticated: Boolean(session),
+            login: session?.login || null,
+            oauthConfigured: Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET)
+          },
+          200,
+          env
+        );
       }
       if (url.pathname === "/logout") {
         const headers = new Headers(corsHeaders(env));
         headers.set("Content-Type", "application/json");
         headers.append("Set-Cookie", clearCookie(COOKIE_NAME));
-        headers.append("Set-Cookie", clearCookie(ADMIN_COOKIE));
         return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
       }
       if (url.pathname === "/content") return handleContent(request, env);

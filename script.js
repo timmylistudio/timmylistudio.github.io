@@ -16,7 +16,7 @@
 
   const renderInlineLinks = (links) =>
     links
-      .map((link) => `<a href="${escapeHtml(link.url)}">${escapeHtml(link.label)}</a>`)
+      .map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`)
       .join(" / ");
 
   const renderNav = (sections) =>
@@ -37,6 +37,13 @@
         ${content}
       </section>
     `;
+  };
+
+  const makeLinksOpenInNewTabs = () => {
+    document.querySelectorAll('a[href]:not([href^="#"])').forEach((link) => {
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+    });
   };
 
   try {
@@ -70,7 +77,9 @@
       photo.alt = content.profile.photoAlt || content.profile.name || "";
       photo.hidden = false;
     }
+    makeLinksOpenInNewTabs();
   } catch (error) {
     console.warn(error);
+    makeLinksOpenInNewTabs();
   }
 })();
