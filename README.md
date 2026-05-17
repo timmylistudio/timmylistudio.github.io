@@ -18,6 +18,6 @@ Then visit `http://localhost:8000`.
 - Update the GitHub and LinkedIn links.
 - Replace the placeholder project cards with real projects.
 - Tune the about copy to match your resume and goals.
-- Push this repo to `https://github.com/timmyli/timmyli.github.io`.
+- Push this repo to `https://github.com/timmylistudio/timmylistudio.github.io`.
 
 GitHub Pages will serve the site from the repository's configured Pages branch.
