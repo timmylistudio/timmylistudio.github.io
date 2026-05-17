@@ -13,6 +13,9 @@ const $ = (selector) => document.querySelector(selector);
 const statusBox = $("#status");
 const sessionStatus = $("#session-status");
 const form = $("#editor");
+const githubLoginButton = $("#github-login");
+const logoutButton = $("#logout");
+const loadContentButton = $("#load-content");
 
 function setStatus(message) {
   statusBox.textContent = message;
@@ -20,6 +23,13 @@ function setStatus(message) {
 
 function setSession(message) {
   sessionStatus.textContent = message;
+}
+
+function updateAuthControls() {
+  githubLoginButton.disabled = signedIn || !oauthConfigured;
+  githubLoginButton.textContent = signedIn ? "Signed in with GitHub" : "Sign in with GitHub";
+  logoutButton.disabled = !signedIn;
+  loadContentButton.disabled = !signedIn;
 }
 
 function requireAuthBase() {
@@ -166,8 +176,10 @@ function collectEditor() {
 async function checkSession() {
   if (!AUTH_BASE) {
     signedIn = false;
+    oauthConfigured = false;
     setSession("GitHub OAuth is not configured.");
     setStatus("Set the GitHub OAuth App client ID and secret in the Worker before signing in.");
+    updateAuthControls();
     return;
   }
 
@@ -178,10 +190,15 @@ async function checkSession() {
     setSession(signedIn ? `Signed in as ${session.login}.` : "Not signed in.");
     if (!oauthConfigured) {
       setStatus("GitHub OAuth App is not configured yet. Add the Client ID and Client Secret to the Worker.");
+    } else if (signedIn) {
+      setStatus("Signed in. You can load, edit, and publish homepage content.");
     }
   } catch (error) {
     signedIn = false;
+    oauthConfigured = false;
     setSession("Not signed in.");
+  } finally {
+    updateAuthControls();
   }
 }
 
@@ -270,6 +287,7 @@ $("#logout").addEventListener("click", async () => {
   try {
     await apiFetch("/logout", { method: "POST" });
     signedIn = false;
+    updateAuthControls();
     setSession("Signed out.");
     setStatus("Signed out.");
   } catch (error) {
@@ -284,6 +302,8 @@ $("#load-content").addEventListener("click", () => {
 $("#add-link").addEventListener("click", () => addLink());
 $("#add-section").addEventListener("click", () => addSection());
 form.addEventListener("submit", publish);
+
+updateAuthControls();
 
 fetch("../content.json", { cache: "no-store" })
   .then((response) => response.json())
