@@ -1,0 +1,66 @@
+{
+  "site": {
+    "title": "Timmy (Anqi) Li",
+    "description": "Timmy (Anqi) Li's personal homepage.",
+    "lastUpdated": "2026.05",
+    "version": "1.1"
+  },
+  "profile": {
+    "name": "Timmy (Anqi) Li",
+    "email": "timmyli@umich.edu",
+    "photo": "",
+    "photoAlt": "Timmy (Anqi) Li"
+  },
+  "links": [
+    {
+      "label": "GitHub",
+      "url": "https://github.com/timmylistudio"
+    },
+    {
+      "label": "LinkedIn",
+      "url": "https://www.linkedin.com/in/anqitimmyli/"
+    },
+    {
+      "label": "Weibo",
+      "url": "https://weibo.com/u/1294673304"
+    }
+  ],
+  "sections": [
+    {
+      "id": "bio",
+      "title": "Bio",
+      "type": "paragraphs",
+      "items": [
+        "Timmy (Anqi) Li is building a personal homepage for projects, notes, and professional links. This page is intentionally simple, fast, and easy to update."
+      ]
+    },
+    {
+      "id": "interests",
+      "title": "Interests",
+      "type": "list",
+      "items": [
+        "Software engineering",
+        "Web development and user interfaces",
+        "Practical tools, automation, and applied AI"
+      ]
+    },
+    {
+      "id": "projects",
+      "title": "Projects",
+      "type": "list",
+      "items": [
+        "<a href=\"https://github.com/timmylistudio\">GitHub repositories</a> - selected code and project work.",
+        "Personal homepage - a lightweight GitHub Pages site hosted at <a href=\"https://timmylistudio.github.io/\">timmylistudio.github.io</a>."
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "Contact",
+      "type": "paragraphs",
+      "items": [
+        "Email is the best way to reach me: <a href=\"mailto:timmyli@umich.edu\">timmyli@umich.edu</a>.",
+        "You can also find me on <a href=\"https://github.com/timmylistudio\">GitHub</a>, <a href=\"https://www.linkedin.com/in/anqitimmyli/\">LinkedIn</a>, and <a href=\"https://weibo.com/u/1294673304\">Weibo</a>."
+      ]
+    }
+  ]
+}

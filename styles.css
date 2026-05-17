@@ -52,7 +52,18 @@ a:hover {
 }
 
 .profile-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
   margin-bottom: 20px;
+}
+
+.profile-photo {
+  width: 150px;
+  height: 190px;
+  object-fit: cover;
+  border: 1px solid #d8d8d8;
 }
 
 .link-line,
@@ -83,5 +94,14 @@ footer {
 
   h2 {
     font-size: 1.2rem;
+  }
+
+  .profile-header {
+    flex-direction: column;
+  }
+
+  .profile-photo {
+    width: 128px;
+    height: 160px;
   }
 }

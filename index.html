@@ -13,24 +13,28 @@
   <body>
     <main class="page">
       <header class="profile-header">
-        <h1>Timmy (Anqi) Li</h1>
-        <p>Email: <a href="mailto:timmyli@umich.edu">timmyli@umich.edu</a></p>
-        <p class="link-line">
-          <a href="https://github.com/timmylistudio">GitHub</a>
-          /
-          <a href="https://www.linkedin.com/in/anqitimmyli/">LinkedIn</a>
-          /
-          <a href="https://weibo.com/u/1294673304">Weibo</a>
-        </p>
-        <p class="section-nav">
-          [<a href="#bio">Bio</a>]
-          [<a href="#interests">Interests</a>]
-          [<a href="#projects">Projects</a>]
-          [<a href="#contact">Contact</a>]
-        </p>
+        <div>
+          <h1 data-field="name">Timmy (Anqi) Li</h1>
+          <p>Email: <a data-field="email" href="mailto:timmyli@umich.edu">timmyli@umich.edu</a></p>
+          <p class="link-line" data-field="links">
+            <a href="https://github.com/timmylistudio">GitHub</a>
+            /
+            <a href="https://www.linkedin.com/in/anqitimmyli/">LinkedIn</a>
+            /
+            <a href="https://weibo.com/u/1294673304">Weibo</a>
+          </p>
+          <p class="section-nav" data-field="nav">
+            [<a href="#bio">Bio</a>]
+            [<a href="#interests">Interests</a>]
+            [<a href="#projects">Projects</a>]
+            [<a href="#contact">Contact</a>]
+          </p>
+        </div>
+        <img class="profile-photo" data-field="photo" alt="" hidden>
       </header>
 
-      <section id="bio">
+      <div data-field="sections">
+        <section id="bio">
         <h2>Bio</h2>
         <p>
           Timmy (Anqi) Li is building a personal homepage for projects, notes,
@@ -75,10 +79,12 @@
           <a href="https://weibo.com/u/1294673304">Weibo</a>.
         </p>
       </section>
+      </div>
 
-      <footer>
+      <footer data-field="footer">
         Last updated: 2026.05 &nbsp;|&nbsp; Version 1.1
       </footer>
     </main>
+    <script src="script.js"></script>
   </body>
 </html>
