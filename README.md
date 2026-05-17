@@ -25,6 +25,8 @@ Visit `/admin/` on the published site to edit homepage content.
 The admin portal supports password login through the Cloudflare Worker in
 `worker/`. The Worker stores the GitHub write token as a Cloudflare secret, so
 the public admin page does not need to ask for a GitHub token during normal use.
+The browser stores a short signed admin session after login, avoiding
+third-party cookie issues.
 
 Worker setup:
 

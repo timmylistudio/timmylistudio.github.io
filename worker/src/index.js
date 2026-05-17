@@ -20,7 +20,7 @@ function corsHeaders(env) {
   return {
     "Access-Control-Allow-Origin": env.ADMIN_ORIGIN,
     "Access-Control-Allow-Credentials": "true",
-    "Access-Control-Allow-Headers": "Content-Type, Accept",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS"
   };
 }
@@ -40,6 +40,11 @@ function setCookie(name, value, maxAge) {
 
 function clearCookie(name) {
   return `${name}=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`;
+}
+
+function getBearerToken(request) {
+  const authorization = request.headers.get("Authorization") || "";
+  return authorization.startsWith("Bearer ") ? authorization.slice("Bearer ".length).trim() : "";
 }
 
 function randomState() {
@@ -105,6 +110,16 @@ async function githubRequest(path, token, options = {}) {
 }
 
 async function getSession(request, env) {
+  if (await verifyAdminSession(getBearerToken(request), env)) {
+    if (!env.GITHUB_WRITE_TOKEN) {
+      throw new Error("GITHUB_WRITE_TOKEN secret is not configured.");
+    }
+    return {
+      login: env.ALLOWED_LOGIN || "admin",
+      token: env.GITHUB_WRITE_TOKEN
+    };
+  }
+
   if (await verifyAdminSession(getCookie(request, ADMIN_COOKIE), env)) {
     if (!env.GITHUB_WRITE_TOKEN) {
       throw new Error("GITHUB_WRITE_TOKEN secret is not configured.");
@@ -139,11 +154,12 @@ async function handlePasswordLogin(request, env) {
     return json({ error: "Invalid password." }, 401, env);
   }
 
+  const session = await createAdminSession(env);
   return json(
-    { ok: true },
+    { ok: true, session },
     200,
     env,
-    { "Set-Cookie": setCookie(ADMIN_COOKIE, await createAdminSession(env), 60 * 60 * 24 * 14) }
+    { "Set-Cookie": setCookie(ADMIN_COOKIE, session, 60 * 60 * 24 * 14) }
   );
 }
 

@@ -4,6 +4,7 @@ const BRANCH = "main";
 const API_ROOT = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const AUTH_BASE = (window.HOMEPAGE_ADMIN_CONFIG?.authBaseUrl || "").replace(/\/$/, "");
 const TOKEN_KEY = "timmylistudio-homepage-token";
+const SESSION_KEY = "timmylistudio-admin-session";
 
 let currentContent = null;
 let contentSha = null;
@@ -36,6 +37,10 @@ function requireAuthBase() {
 
 function token() {
   return $("#token")?.value.trim() || "";
+}
+
+function adminSession() {
+  return localStorage.getItem(SESSION_KEY) || "";
 }
 
 function directHeaders() {
@@ -71,11 +76,13 @@ function slugify(value) {
 
 async function apiFetch(path, options = {}) {
   requireAuthBase();
+  const session = adminSession();
   const response = await fetch(`${AUTH_BASE}${path}`, {
     ...options,
     credentials: "include",
     headers: {
       Accept: "application/json",
+      ...(session ? { Authorization: `Bearer ${session}` } : {}),
       ...(options.headers || {})
     }
   });
@@ -247,13 +254,16 @@ async function passwordLogin() {
 
   try {
     setStatus("Signing in...");
-    await apiFetch("/password-login", {
+    const result = await apiFetch("/password-login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ password })
     });
+    if (result.session) {
+      localStorage.setItem(SESSION_KEY, result.session);
+    }
     $("#admin-password").value = "";
     await checkSession();
     await loadContent();
@@ -332,6 +342,7 @@ $("#password-login").addEventListener("click", passwordLogin);
 $("#logout").addEventListener("click", async () => {
   try {
     await apiFetch("/logout", { method: "POST" });
+    localStorage.removeItem(SESSION_KEY);
     signedIn = false;
     setSession("Signed out.");
     setStatus("Signed out.");
