@@ -76,6 +76,10 @@ a:hover {
 }
 
 footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
   margin-top: 36px;
   padding-top: 10px;
   border-top: 1px solid #d8d8d8;
@@ -83,19 +87,9 @@ footer {
   font-size: 0.95rem;
 }
 
-.admin-button {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 20;
-  border: 1px solid #b9c5cf;
-  border-radius: 999px;
-  padding: 8px 13px;
-  background: #fff;
+.admin-link {
   color: #0645ad;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-  font-family: Arial, sans-serif;
-  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 @media (max-width: 640px) {
@@ -111,9 +105,13 @@ footer {
     font-size: 1.2rem;
   }
 
-  .admin-button {
-    right: 12px;
-    bottom: 12px;
+  footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-link {
+    align-self: flex-end;
   }
 
   .profile-header {

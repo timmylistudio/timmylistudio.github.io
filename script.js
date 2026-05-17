@@ -59,6 +59,7 @@
     const nav = document.querySelector('[data-field="nav"]');
     const sections = document.querySelector('[data-field="sections"]');
     const footer = document.querySelector('[data-field="footer"]');
+    const adminLink = footer?.querySelector(".admin-link");
     const photo = document.querySelector('[data-field="photo"]');
 
     document.title = content.site?.title || content.profile?.name || document.title;
@@ -70,7 +71,10 @@
     if (nav) nav.innerHTML = renderNav(content.sections || []);
     if (sections) sections.innerHTML = (content.sections || []).map(renderSection).join("");
     if (footer) {
-      footer.innerHTML = `Last updated: ${escapeHtml(content.site?.lastUpdated || "")} &nbsp;|&nbsp; Version ${escapeHtml(content.site?.version || "")}`;
+      footer.innerHTML = `<span>Last updated: ${escapeHtml(content.site?.lastUpdated || "")} &nbsp;|&nbsp; Version ${escapeHtml(content.site?.version || "")}</span>`;
+      if (adminLink) {
+        footer.append(adminLink);
+      }
     }
     if (photo && content.profile?.photo) {
       photo.src = content.profile.photo;
