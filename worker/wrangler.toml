@@ -1,0 +1,10 @@
+name = "timmylistudio-homepage-auth"
+main = "src/index.js"
+compatibility_date = "2026-05-17"
+
+[vars]
+GITHUB_CLIENT_ID = ""
+ADMIN_ORIGIN = "https://timmylistudio.github.io"
+ALLOWED_LOGIN = "timmylistudio"
+GITHUB_OWNER = "timmylistudio"
+GITHUB_REPO = "timmylistudio.github.io"

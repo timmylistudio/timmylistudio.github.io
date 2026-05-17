@@ -1,31 +1,30 @@
 const OWNER = "timmylistudio";
 const REPO = "timmylistudio.github.io";
 const BRANCH = "main";
-const API_ROOT = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
-const TOKEN_KEY = "timmylistudio-homepage-token";
+const AUTH_BASE = (window.HOMEPAGE_ADMIN_CONFIG?.authBaseUrl || "").replace(/\/$/, "");
 
 let currentContent = null;
 let contentSha = null;
 let uploadedPhotoPath = "";
+let signedIn = false;
 
 const $ = (selector) => document.querySelector(selector);
 const statusBox = $("#status");
+const sessionStatus = $("#session-status");
 const form = $("#editor");
 
 function setStatus(message) {
   statusBox.textContent = message;
 }
 
-function token() {
-  return $("#token").value.trim();
+function setSession(message) {
+  sessionStatus.textContent = message;
 }
 
-function headers() {
-  return {
-    Accept: "application/vnd.github+json",
-    Authorization: `Bearer ${token()}`,
-    "X-GitHub-Api-Version": "2022-11-28"
-  };
+function requireAuthBase() {
+  if (!AUTH_BASE) {
+    throw new Error("Admin login is not configured yet. Set authBaseUrl in admin/config.js after deploying the Worker.");
+  }
 }
 
 function encodeBase64Unicode(value) {
@@ -51,9 +50,15 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "") || "section";
 }
 
-async function githubGet(path) {
-  const response = await fetch(`${API_ROOT}/${path}?ref=${BRANCH}`, {
-    headers: headers()
+async function apiFetch(path, options = {}) {
+  requireAuthBase();
+  const response = await fetch(`${AUTH_BASE}${path}`, {
+    ...options,
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      ...(options.headers || {})
+    }
   });
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}: ${await response.text()}`);
@@ -61,26 +66,23 @@ async function githubGet(path) {
   return response.json();
 }
 
-async function githubPut(path, content, message, sha) {
-  const body = {
-    message,
-    content,
-    branch: BRANCH
-  };
-  if (sha) body.sha = sha;
+async function githubGet(path) {
+  return apiFetch(`/content?path=${encodeURIComponent(path)}&ref=${encodeURIComponent(BRANCH)}`);
+}
 
-  const response = await fetch(`${API_ROOT}/${path}`, {
+async function githubPut(path, content, message, sha) {
+  return apiFetch(`/content?path=${encodeURIComponent(path)}`, {
     method: "PUT",
     headers: {
-      ...headers(),
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      branch: BRANCH,
+      content,
+      message,
+      sha
+    })
   });
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}: ${await response.text()}`);
-  }
-  return response.json();
 }
 
 function addLink(link = { label: "", url: "" }) {
@@ -160,9 +162,27 @@ function collectEditor() {
   };
 }
 
+async function checkSession() {
+  if (!AUTH_BASE) {
+    signedIn = false;
+    setSession("Login service not configured yet.");
+    setStatus("Set authBaseUrl in admin/config.js after deploying the Cloudflare Worker.");
+    return;
+  }
+
+  try {
+    const session = await apiFetch("/session");
+    signedIn = Boolean(session.authenticated);
+    setSession(signedIn ? `Signed in as ${session.login}.` : "Not signed in.");
+  } catch (error) {
+    signedIn = false;
+    setSession("Not signed in.");
+  }
+}
+
 async function loadContent() {
-  if (!token()) {
-    setStatus("Add a GitHub token first.");
+  if (!signedIn) {
+    setStatus("Sign in with GitHub first, then load content.");
     return;
   }
 
@@ -198,8 +218,8 @@ async function uploadPhotoIfNeeded() {
 
 async function publish(event) {
   event.preventDefault();
-  if (!token()) {
-    setStatus("Add a GitHub token first.");
+  if (!signedIn) {
+    setStatus("Sign in with GitHub first.");
     return;
   }
 
@@ -225,15 +245,24 @@ async function publish(event) {
   }
 }
 
-$("#save-token").addEventListener("click", () => {
-  localStorage.setItem(TOKEN_KEY, token());
-  setStatus("Token saved in this browser.");
+$("#login").addEventListener("click", () => {
+  try {
+    requireAuthBase();
+    window.location.href = `${AUTH_BASE}/login?return_to=${encodeURIComponent(window.location.href)}`;
+  } catch (error) {
+    setStatus(error.message);
+  }
 });
 
-$("#forget-token").addEventListener("click", () => {
-  localStorage.removeItem(TOKEN_KEY);
-  $("#token").value = "";
-  setStatus("Token removed from this browser.");
+$("#logout").addEventListener("click", async () => {
+  try {
+    await apiFetch("/logout", { method: "POST" });
+    signedIn = false;
+    setSession("Signed out.");
+    setStatus("Signed out.");
+  } catch (error) {
+    setStatus(`Sign out failed:\n${error.message}`);
+  }
 });
 
 $("#load-content").addEventListener("click", () => {
@@ -243,11 +272,6 @@ $("#load-content").addEventListener("click", () => {
 $("#add-link").addEventListener("click", () => addLink());
 $("#add-section").addEventListener("click", () => addSection());
 form.addEventListener("submit", publish);
-
-const savedToken = localStorage.getItem(TOKEN_KEY);
-if (savedToken) {
-  $("#token").value = savedToken;
-}
 
 fetch("../content.json", { cache: "no-store" })
   .then((response) => response.json())
@@ -260,3 +284,5 @@ fetch("../content.json", { cache: "no-store" })
       sections: []
     });
   });
+
+checkSession();

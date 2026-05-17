@@ -123,6 +123,18 @@ button.secondary,
   margin-top: 12px;
 }
 
+.session-status {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 12px;
+  background: #f7fbff;
+  color: #30404e;
+  font-weight: 800;
+}
+
 .item-row {
   padding: 16px;
   border: 1px solid var(--line);
