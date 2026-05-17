@@ -20,4 +20,4 @@ Then visit `http://localhost:8000`.
 - Tune the about copy to match your resume and goals.
 - Push this repo to `https://github.com/timmyli/timmyli.github.io`.
 
-GitHub Pages will serve a user site from the repository's default branch.
+GitHub Pages will serve the site from the repository's configured Pages branch.
