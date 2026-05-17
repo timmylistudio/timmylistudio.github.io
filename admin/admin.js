@@ -1,7 +1,9 @@
 const OWNER = "timmylistudio";
 const REPO = "timmylistudio.github.io";
 const BRANCH = "main";
+const API_ROOT = `https://api.github.com/repos/${OWNER}/${REPO}/contents`;
 const AUTH_BASE = (window.HOMEPAGE_ADMIN_CONFIG?.authBaseUrl || "").replace(/\/$/, "");
+const TOKEN_KEY = "timmylistudio-homepage-token";
 
 let currentContent = null;
 let contentSha = null;
@@ -25,6 +27,18 @@ function requireAuthBase() {
   if (!AUTH_BASE) {
     throw new Error("Admin login is not configured yet. Set authBaseUrl in admin/config.js after deploying the Worker.");
   }
+}
+
+function token() {
+  return $("#token")?.value.trim() || "";
+}
+
+function directHeaders() {
+  return {
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${token()}`,
+    "X-GitHub-Api-Version": "2022-11-28"
+  };
 }
 
 function encodeBase64Unicode(value) {
@@ -67,10 +81,42 @@ async function apiFetch(path, options = {}) {
 }
 
 async function githubGet(path) {
+  if (!signedIn && token()) {
+    const response = await fetch(`${API_ROOT}/${path}?ref=${BRANCH}`, {
+      headers: directHeaders()
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}: ${await response.text()}`);
+    }
+    return response.json();
+  }
+
   return apiFetch(`/content?path=${encodeURIComponent(path)}&ref=${encodeURIComponent(BRANCH)}`);
 }
 
 async function githubPut(path, content, message, sha) {
+  if (!signedIn && token()) {
+    const body = {
+      branch: BRANCH,
+      content,
+      message
+    };
+    if (sha) body.sha = sha;
+
+    const response = await fetch(`${API_ROOT}/${path}`, {
+      method: "PUT",
+      headers: {
+        ...directHeaders(),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}: ${await response.text()}`);
+    }
+    return response.json();
+  }
+
   return apiFetch(`/content?path=${encodeURIComponent(path)}`, {
     method: "PUT",
     headers: {
@@ -181,8 +227,8 @@ async function checkSession() {
 }
 
 async function loadContent() {
-  if (!signedIn) {
-    setStatus("Sign in with GitHub first, then load content.");
+  if (!signedIn && !token()) {
+    setStatus("Sign in with GitHub or add a token first, then load content.");
     return;
   }
 
@@ -218,8 +264,8 @@ async function uploadPhotoIfNeeded() {
 
 async function publish(event) {
   event.preventDefault();
-  if (!signedIn) {
-    setStatus("Sign in with GitHub first.");
+  if (!signedIn && !token()) {
+    setStatus("Sign in with GitHub or add a token first.");
     return;
   }
 
@@ -265,6 +311,17 @@ $("#logout").addEventListener("click", async () => {
   }
 });
 
+$("#save-token").addEventListener("click", () => {
+  localStorage.setItem(TOKEN_KEY, token());
+  setStatus("Token saved in this browser.");
+});
+
+$("#forget-token").addEventListener("click", () => {
+  localStorage.removeItem(TOKEN_KEY);
+  $("#token").value = "";
+  setStatus("Token removed from this browser.");
+});
+
 $("#load-content").addEventListener("click", () => {
   loadContent().catch((error) => setStatus(`Load failed:\n${error.message}`));
 });
@@ -272,6 +329,11 @@ $("#load-content").addEventListener("click", () => {
 $("#add-link").addEventListener("click", () => addLink());
 $("#add-section").addEventListener("click", () => addSection());
 form.addEventListener("submit", publish);
+
+const savedToken = localStorage.getItem(TOKEN_KEY);
+if (savedToken && $("#token")) {
+  $("#token").value = savedToken;
+}
 
 fetch("../content.json", { cache: "no-store" })
   .then((response) => response.json())

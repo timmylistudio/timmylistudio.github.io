@@ -32,6 +32,23 @@
         </div>
       </section>
 
+      <section class="panel">
+        <h2>Token Fallback</h2>
+        <p class="help">
+          Until the GitHub login service is deployed, paste a fine-grained token
+          with Contents read/write access here. If you click "Remember token",
+          this browser will keep it for next time.
+        </p>
+        <label>
+          GitHub token
+          <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
+        </label>
+        <div class="actions">
+          <button id="save-token" type="button">Remember token</button>
+          <button id="forget-token" type="button" class="secondary">Forget token</button>
+        </div>
+      </section>
+
       <form id="editor" class="panel">
         <h2>Profile</h2>
         <div class="grid">
