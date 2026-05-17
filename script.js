@@ -58,12 +58,6 @@
     if (name) name.textContent = content.profile?.name || "";
     if (email) {
       email.textContent = content.profile?.email || "";
-      const emailValue = content.profile?.email || "";
-      if (emailValue.includes("@")) {
-        email.href = `mailto:${emailValue}`;
-      } else {
-        email.removeAttribute("href");
-      }
     }
     if (links) links.innerHTML = renderInlineLinks(content.links || []);
     if (nav) nav.innerHTML = renderNav(content.sections || []);
