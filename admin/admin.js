@@ -23,6 +23,11 @@ function setSession(message) {
   sessionStatus.textContent = message;
 }
 
+function setLoginControlsEnabled(enabled) {
+  $("#login").disabled = !enabled;
+  $("#logout").disabled = !enabled;
+}
+
 function requireAuthBase() {
   if (!AUTH_BASE) {
     throw new Error("Admin login is not configured yet. Set authBaseUrl in admin/config.js after deploying the Worker.");
@@ -211,12 +216,14 @@ function collectEditor() {
 async function checkSession() {
   if (!AUTH_BASE) {
     signedIn = false;
-    setSession("Login service not configured yet.");
-    setStatus("Set authBaseUrl in admin/config.js after deploying the Cloudflare Worker.");
+    setLoginControlsEnabled(false);
+    setSession("GitHub login setup required.");
+    setStatus("Use the token editor for now. GitHub login needs an OAuth App client ID and secret before it can work.");
     return;
   }
 
   try {
+    setLoginControlsEnabled(true);
     const session = await apiFetch("/session");
     signedIn = Boolean(session.authenticated);
     setSession(signedIn ? `Signed in as ${session.login}.` : "Not signed in.");

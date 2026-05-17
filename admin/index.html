@@ -18,26 +18,11 @@
       </header>
 
       <section class="panel">
-        <h2>GitHub Access</h2>
+        <h2>Editor Access</h2>
         <p class="help">
-          Sign in with GitHub to publish edits to
-          <strong>timmylistudio/timmylistudio.github.io</strong>. The secure
-          login service keeps the GitHub token out of this public page.
-        </p>
-        <p id="session-status" class="session-status">Checking login...</p>
-        <div class="actions">
-          <button id="login" type="button">Sign in with GitHub</button>
-          <button id="logout" type="button" class="secondary">Sign out</button>
-          <button id="load-content" type="button">Load from GitHub</button>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2>Token Fallback</h2>
-        <p class="help">
-          Until the GitHub login service is deployed, paste a fine-grained token
-          with Contents read/write access here. If you click "Remember token",
-          this browser will keep it for next time.
+          Paste a fine-grained GitHub token with Contents read/write access for
+          <strong>timmylistudio/timmylistudio.github.io</strong>. If you click
+          "Remember token", this browser will keep it for next time.
         </p>
         <label>
           GitHub token
@@ -46,6 +31,20 @@
         <div class="actions">
           <button id="save-token" type="button">Remember token</button>
           <button id="forget-token" type="button" class="secondary">Forget token</button>
+          <button id="load-content" type="button">Load from GitHub</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>GitHub Login</h2>
+        <p class="help">
+          The no-token GitHub login service is deployed, but it still needs a
+          GitHub OAuth App client ID and secret before it can be enabled.
+        </p>
+        <p id="session-status" class="session-status">GitHub login setup required.</p>
+        <div class="actions">
+          <button id="login" type="button" disabled>Sign in with GitHub</button>
+          <button id="logout" type="button" class="secondary" disabled>Sign out</button>
         </div>
       </section>
 
