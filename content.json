@@ -23,6 +23,10 @@
     {
       "label": "Weibo",
       "url": "https://weibo.com/u/1294673304"
+    },
+    {
+      "label": "Michigan Ross Ambassador",
+      "url": "https://michiganross.umich.edu/ambassadors/anqi-timmy-li"
     }
   ],
   "sections": [
@@ -31,7 +35,7 @@
       "title": "Bio",
       "type": "paragraphs",
       "items": [
-        "Timmy (Anqi) Li is building a personal homepage for projects, notes, and professional links. This page is intentionally simple, fast, and easy to update."
+        "Timmy is building a personal homepage for projects, notes, and professional links. This page is intentionally simple, fast, and easy to update."
       ]
     },
     {
