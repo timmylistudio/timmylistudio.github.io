@@ -43,9 +43,9 @@
       "title": "Interests",
       "type": "list",
       "items": [
-        "Software engineering",
-        "Web development and user interfaces",
-        "Practical tools, automation, and applied AI"
+        "Vibe Coding",
+        "Data privacy and security research in general, AI security and privacy",
+        "Tennis 🎾"
       ]
     },
     {
@@ -55,15 +55,6 @@
       "items": [
         "<a href=\"https://github.com/timmylistudio\">GitHub repositories</a> - selected code and project work.",
         "Personal homepage - a lightweight GitHub Pages site hosted at <a href=\"https://timmylistudio.github.io/\">timmylistudio.github.io</a>."
-      ]
-    },
-    {
-      "id": "contact",
-      "title": "Contact",
-      "type": "paragraphs",
-      "items": [
-        "Email is the best way to reach me: <a href=\"mailto:timmyli@umich.edu\">timmyli@umich.edu</a>.",
-        "You can also find me on <a href=\"https://github.com/timmylistudio\">GitHub</a>, <a href=\"https://www.linkedin.com/in/anqitimmyli/\">LinkedIn</a>, and <a href=\"https://weibo.com/u/1294673304\">Weibo</a>."
       ]
     }
   ]
