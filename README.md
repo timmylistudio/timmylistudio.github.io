@@ -22,27 +22,21 @@ Then visit `http://localhost:8000`.
 
 Visit `/admin/` on the published site to edit homepage content.
 
-The admin portal supports GitHub login through the Cloudflare Worker in
-`worker/`. Create a GitHub OAuth App, deploy the Worker, set the Worker URL in
-`admin/config.js`, then use "Sign in with GitHub" on `/admin/`.
-
-GitHub OAuth App settings:
-
-- Homepage URL: `https://timmylistudio.github.io/admin/`
-- Authorization callback URL: `https://<your-worker-url>/callback`
+The admin portal supports password login through the Cloudflare Worker in
+`worker/`. The Worker stores the GitHub write token as a Cloudflare secret, so
+the public admin page does not need to ask for a GitHub token during normal use.
 
 Worker setup:
 
 ```bash
 cd worker
-wrangler secret put GITHUB_CLIENT_SECRET
+wrangler secret put ADMIN_PASSWORD
+wrangler secret put SESSION_SECRET
+wrangler secret put GITHUB_WRITE_TOKEN
 wrangler deploy
 ```
 
-Before deploying for the first time, register a `workers.dev` subdomain for the
-Cloudflare account. Set `GITHUB_CLIENT_ID` in `worker/wrangler.toml`, put the
-OAuth app secret into `GITHUB_CLIENT_SECRET`, deploy the Worker, then put the
-deployed Worker URL in `admin/config.js`.
+The deployed Worker URL is configured in `admin/config.js`.
 - Push this repo to `https://github.com/timmylistudio/timmylistudio.github.io`.
 
 GitHub Pages will serve the site from the repository's configured Pages branch.

@@ -1,3 +1,3 @@
 window.HOMEPAGE_ADMIN_CONFIG = {
-  authBaseUrl: ""
+  authBaseUrl: "https://timmylistudio-homepage-auth.timmylistudio.workers.dev"
 };

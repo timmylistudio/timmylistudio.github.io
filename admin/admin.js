@@ -24,7 +24,7 @@ function setSession(message) {
 }
 
 function setLoginControlsEnabled(enabled) {
-  $("#login").disabled = !enabled;
+  $("#password-login").disabled = !enabled;
   $("#logout").disabled = !enabled;
 }
 
@@ -217,8 +217,8 @@ async function checkSession() {
   if (!AUTH_BASE) {
     signedIn = false;
     setLoginControlsEnabled(false);
-    setSession("GitHub login setup required.");
-    setStatus("Use the token editor for now. GitHub login needs an OAuth App client ID and secret before it can work.");
+    setSession("Password login is not configured.");
+    setStatus("Use the token fallback for now.");
     return;
   }
 
@@ -230,6 +230,35 @@ async function checkSession() {
   } catch (error) {
     signedIn = false;
     setSession("Not signed in.");
+  }
+}
+
+async function passwordLogin() {
+  if (!AUTH_BASE) {
+    setStatus("Password login is not configured.");
+    return;
+  }
+
+  const password = $("#admin-password").value;
+  if (!password) {
+    setStatus("Enter the admin password first.");
+    return;
+  }
+
+  try {
+    setStatus("Signing in...");
+    await apiFetch("/password-login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ password })
+    });
+    $("#admin-password").value = "";
+    await checkSession();
+    await loadContent();
+  } catch (error) {
+    setStatus(`Sign in failed:\n${error.message}`);
   }
 }
 
@@ -298,14 +327,7 @@ async function publish(event) {
   }
 }
 
-$("#login").addEventListener("click", () => {
-  try {
-    requireAuthBase();
-    window.location.href = `${AUTH_BASE}/login?return_to=${encodeURIComponent(window.location.href)}`;
-  } catch (error) {
-    setStatus(error.message);
-  }
-});
+$("#password-login").addEventListener("click", passwordLogin);
 
 $("#logout").addEventListener("click", async () => {
   try {
