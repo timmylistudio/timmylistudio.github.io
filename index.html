@@ -3,163 +3,82 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Timmy Li's personal website and portfolio.">
-    <meta property="og:title" content="Timmy Li">
-    <meta property="og:description" content="Personal portfolio, projects, and contact links for Timmy Li.">
+    <meta name="description" content="Timmy (Anqi) Li's personal homepage.">
+    <meta property="og:title" content="Timmy (Anqi) Li">
+    <meta property="og:description" content="Personal homepage and links for Timmy (Anqi) Li.">
     <meta property="og:type" content="website">
-    <title>Timmy Li</title>
-    <link rel="preconnect" href="https://images.unsplash.com">
+    <title>Timmy (Anqi) Li</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <header class="site-header" aria-label="Primary navigation">
-      <a class="brand" href="#top" aria-label="Timmy Li home">
-        <span class="brand-mark">TL</span>
-        <span>Timmy Li</span>
-      </a>
-      <nav class="nav-links" aria-label="Site sections">
-        <a href="#work">Work</a>
-        <a href="#projects">Projects</a>
-        <a href="#contact">Contact</a>
-      </nav>
-    </header>
+    <main class="page">
+      <header class="profile-header">
+        <h1>Timmy (Anqi) Li</h1>
+        <p>Email: <a href="mailto:timmyli@umich.edu">timmyli@umich.edu</a></p>
+        <p class="link-line">
+          <a href="https://github.com/timmylistudio">GitHub</a>
+          /
+          <a href="https://www.linkedin.com/in/anqitimmyli/">LinkedIn</a>
+          /
+          <a href="https://weibo.com/u/1294673304">Weibo</a>
+        </p>
+        <p class="section-nav">
+          [<a href="#bio">Bio</a>]
+          [<a href="#interests">Interests</a>]
+          [<a href="#projects">Projects</a>]
+          [<a href="#contact">Contact</a>]
+        </p>
+      </header>
 
-    <main id="top">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-media" role="img" aria-label="Laptop with code in a focused workspace"></div>
-        <div class="hero-content">
-          <p class="eyebrow">Software builder</p>
-          <h1 id="hero-title">Timmy Li</h1>
-          <p class="hero-copy">
-            I build practical, reliable software with a taste for clean systems,
-            thoughtful interfaces, and work that is easy to maintain after launch.
-          </p>
-          <div class="hero-actions" aria-label="Primary actions">
-            <a class="button primary" href="#projects">View projects</a>
-            <a class="button secondary" href="mailto:hello@example.com">Email me</a>
-          </div>
-        </div>
+      <section id="bio">
+        <h2>Bio</h2>
+        <p>
+          Timmy (Anqi) Li is building a personal homepage for projects, notes,
+          and professional links. This page is intentionally simple, fast, and
+          easy to update.
+        </p>
       </section>
 
-      <section class="intro section-grid" aria-labelledby="intro-title">
-        <div>
-          <p class="section-kicker">About</p>
-          <h2 id="intro-title">A concise home base for your work.</h2>
-        </div>
-        <div class="intro-copy">
-          <p>
-            This site is set up as a clean GitHub Pages portfolio. Replace this
-            paragraph with your current role, the kinds of problems you like to
-            solve, and the signal you want visitors to remember.
-          </p>
-          <p>
-            The structure is intentionally lightweight: no build step, no package
-            install, and no framework lock-in. Edit the HTML, push to GitHub, and
-            the page is ready.
-          </p>
-        </div>
-      </section>
-
-      <section id="work" class="work-band" aria-labelledby="work-title">
-        <div class="section-heading">
-          <p class="section-kicker">Focus</p>
-          <h2 id="work-title">What I care about</h2>
-        </div>
-        <div class="focus-list">
-          <article>
-            <span class="number">01</span>
-            <h3>Backend systems</h3>
-            <p>Clear data models, dependable APIs, and operational details that hold up in production.</p>
-          </article>
-          <article>
-            <span class="number">02</span>
-            <h3>Product thinking</h3>
-            <p>Interfaces that help people move quickly without making them learn the machinery first.</p>
-          </article>
-          <article>
-            <span class="number">03</span>
-            <h3>Technical depth</h3>
-            <p>Careful debugging, measured tradeoffs, and code that stays readable under pressure.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="projects" class="projects" aria-labelledby="projects-title">
-        <div class="section-heading">
-          <p class="section-kicker">Selected projects</p>
-          <h2 id="projects-title">A few things worth sharing</h2>
-        </div>
-        <div class="project-grid">
-          <article class="project-card">
-            <div class="project-meta">
-              <span>Web</span>
-              <span>2026</span>
-            </div>
-            <h3>Portfolio refresh</h3>
-            <p>A fast, responsive personal site designed for GitHub Pages and easy updates.</p>
-            <a href="https://github.com/timmylistudio" aria-label="Open GitHub profile">GitHub</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">
-              <span>Software</span>
-              <span>Featured</span>
-            </div>
-            <h3>Project name</h3>
-            <p>Replace this with a short, outcome-focused description of a project you want recruiters or collaborators to notice.</p>
-            <a href="#contact">Add link</a>
-          </article>
-          <article class="project-card">
-            <div class="project-meta">
-              <span>Research</span>
-              <span>Case study</span>
-            </div>
-            <h3>Project name</h3>
-            <p>Use this card for a paper, prototype, open-source contribution, or a technical write-up.</p>
-            <a href="#contact">Add link</a>
-          </article>
-        </div>
-      </section>
-
-      <section class="toolkit section-grid" aria-labelledby="toolkit-title">
-        <div>
-          <p class="section-kicker">Toolkit</p>
-          <h2 id="toolkit-title">Comfortable across the stack.</h2>
-        </div>
-        <ul class="tag-list" aria-label="Skills and technologies">
-          <li>Python</li>
-          <li>JavaScript</li>
-          <li>TypeScript</li>
-          <li>React</li>
-          <li>SQL</li>
-          <li>APIs</li>
-          <li>Cloud</li>
-          <li>Git</li>
+      <section id="interests">
+        <h2>Interests</h2>
+        <ul>
+          <li>Software engineering</li>
+          <li>Web development and user interfaces</li>
+          <li>Practical tools, automation, and applied AI</li>
         </ul>
       </section>
 
-      <section id="contact" class="contact" aria-labelledby="contact-title">
-        <div>
-          <p class="section-kicker">Contact</p>
-          <h2 id="contact-title">Let’s make this page unmistakably yours.</h2>
-          <p>
-            Send over your resume, LinkedIn, GitHub, project links, and a preferred
-            email. I can wire them in and tune the copy around the story you want
-            this site to tell.
-          </p>
-        </div>
-        <div class="contact-links">
-          <a href="mailto:hello@example.com">Email</a>
-          <a href="https://github.com/timmylistudio">GitHub</a>
-          <a href="https://www.linkedin.com/">LinkedIn</a>
-        </div>
+      <section id="projects">
+        <h2>Projects</h2>
+        <ul>
+          <li>
+            <a href="https://github.com/timmylistudio">GitHub repositories</a>
+            - selected code and project work.
+          </li>
+          <li>
+            Personal homepage - a lightweight GitHub Pages site hosted at
+            <a href="https://timmylistudio.github.io/">timmylistudio.github.io</a>.
+          </li>
+        </ul>
       </section>
+
+      <section id="contact">
+        <h2>Contact</h2>
+        <p>
+          Email is the best way to reach me:
+          <a href="mailto:timmyli@umich.edu">timmyli@umich.edu</a>.
+        </p>
+        <p>
+          You can also find me on
+          <a href="https://github.com/timmylistudio">GitHub</a>,
+          <a href="https://www.linkedin.com/in/anqitimmyli/">LinkedIn</a>, and
+          <a href="https://weibo.com/u/1294673304">Weibo</a>.
+        </p>
+      </section>
+
+      <footer>
+        Last updated: 2026.05 &nbsp;|&nbsp; Version 1.1
+      </footer>
     </main>
-
-    <footer class="site-footer">
-      <span>&copy; <span id="year"></span> Timmy Li</span>
-      <a href="#top">Back to top</a>
-    </footer>
-
-    <script src="script.js"></script>
   </body>
 </html>

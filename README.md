@@ -1,6 +1,6 @@
 # timmyli.github.io
 
-Static personal website for GitHub Pages.
+Static personal homepage for GitHub Pages.
 
 ## Local preview
 
@@ -14,10 +14,9 @@ Then visit `http://localhost:8000`.
 
 ## Personalization checklist
 
-- Replace `hello@example.com` with your preferred email.
-- Update the GitHub and LinkedIn links.
-- Replace the placeholder project cards with real projects.
-- Tune the about copy to match your resume and goals.
+- Update the bio and interests as your profile changes.
+- Add project, publication, or resume links when they are ready.
+- Keep the footer's last-updated version current.
 - Push this repo to `https://github.com/timmylistudio/timmylistudio.github.io`.
 
 GitHub Pages will serve the site from the repository's configured Pages branch.
