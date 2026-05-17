@@ -19,9 +19,15 @@ function corsHeaders(env) {
   return {
     "Access-Control-Allow-Origin": env.ADMIN_ORIGIN,
     "Access-Control-Allow-Credentials": "true",
-    "Access-Control-Allow-Headers": "Content-Type, Accept",
+    "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS"
   };
+}
+
+function getBearerToken(request) {
+  const authorization = request.headers.get("Authorization") || "";
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1] : null;
 }
 
 function getCookie(request, name) {
@@ -47,6 +53,25 @@ function randomState() {
   return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+function safeReturnTo(value, env) {
+  try {
+    const url = new URL(value || env.ADMIN_ORIGIN);
+    if (url.origin === env.ADMIN_ORIGIN) return url.toString();
+  } catch (error) {
+    // Fall through to the admin origin below.
+  }
+  return `${env.ADMIN_ORIGIN}/admin/`;
+}
+
+function withSessionFragment(returnTo, token, login) {
+  const url = new URL(returnTo);
+  url.hash = new URLSearchParams({
+    admin_session: token,
+    login
+  }).toString();
+  return url.toString();
+}
+
 async function githubRequest(path, token, options = {}) {
   const response = await fetch(`${GITHUB_API}${path}`, {
     ...options,
@@ -68,7 +93,7 @@ async function githubRequest(path, token, options = {}) {
 }
 
 async function getSession(request, env) {
-  const token = getCookie(request, COOKIE_NAME);
+  const token = getBearerToken(request) || getCookie(request, COOKIE_NAME);
   if (!token) return null;
 
   const user = await githubRequest("/user", token);
@@ -88,7 +113,7 @@ async function handleLogin(request, env) {
   }
 
   const url = new URL(request.url);
-  const returnTo = url.searchParams.get("return_to") || env.ADMIN_ORIGIN;
+  const returnTo = safeReturnTo(url.searchParams.get("return_to"), env);
   const state = randomState();
   const redirectUri = `${url.origin}/callback`;
   const authorize = new URL(GITHUB_AUTHORIZE_URL);
@@ -119,7 +144,9 @@ async function handleCallback(request, env) {
   const separatorIndex = stateParam.indexOf(".");
   const state = separatorIndex >= 0 ? stateParam.slice(0, separatorIndex) : "";
   const returnTo =
-    separatorIndex >= 0 ? decodeURIComponent(stateParam.slice(separatorIndex + 1)) : env.ADMIN_ORIGIN;
+    separatorIndex >= 0
+      ? safeReturnTo(decodeURIComponent(stateParam.slice(separatorIndex + 1)), env)
+      : `${env.ADMIN_ORIGIN}/admin/`;
 
   if (!code || !state || state !== storedState) {
     return new Response("Invalid GitHub login state.", { status: 400 });
@@ -147,7 +174,9 @@ async function handleCallback(request, env) {
     return new Response(`Signed in as ${user.login}; expected ${env.ALLOWED_LOGIN}.`, { status: 403 });
   }
 
-  const headers = new Headers({ Location: returnTo });
+  const headers = new Headers({
+    Location: withSessionFragment(returnTo, tokenData.access_token, user.login)
+  });
   headers.append("Set-Cookie", setCookie(COOKIE_NAME, tokenData.access_token, 60 * 60 * 24 * 14));
   headers.append("Set-Cookie", clearCookie(STATE_COOKIE));
 
@@ -201,12 +230,19 @@ export default {
       if (url.pathname === "/login") return handleLogin(request, env);
       if (url.pathname === "/callback") return handleCallback(request, env);
       if (url.pathname === "/session") {
-        const session = await getSession(request, env);
+        let session = null;
+        let sessionError = null;
+        try {
+          session = await getSession(request, env);
+        } catch (error) {
+          sessionError = error.message;
+        }
         return json(
           {
             authenticated: Boolean(session),
             login: session?.login || null,
-            oauthConfigured: Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET)
+            oauthConfigured: Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET),
+            sessionError
           },
           200,
           env

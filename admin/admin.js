@@ -2,6 +2,8 @@ const OWNER = "timmylistudio";
 const REPO = "timmylistudio.github.io";
 const BRANCH = "main";
 const AUTH_BASE = (window.HOMEPAGE_ADMIN_CONFIG?.authBaseUrl || "").replace(/\/$/, "");
+const SESSION_STORAGE_KEY = "timmylistudio_admin_session";
+const LOGIN_STORAGE_KEY = "timmylistudio_admin_login";
 
 let currentContent = null;
 let contentSha = null;
@@ -23,6 +25,32 @@ function setStatus(message) {
 
 function setSession(message) {
   sessionStatus.textContent = message;
+}
+
+function getStoredSessionToken() {
+  return localStorage.getItem(SESSION_STORAGE_KEY) || "";
+}
+
+function storeSession(token, login) {
+  localStorage.setItem(SESSION_STORAGE_KEY, token);
+  if (login) localStorage.setItem(LOGIN_STORAGE_KEY, login);
+}
+
+function clearStoredSession() {
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+  localStorage.removeItem(LOGIN_STORAGE_KEY);
+}
+
+function captureOAuthSessionFromUrl() {
+  if (!window.location.hash) return;
+
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  const token = params.get("admin_session");
+  if (!token) return;
+
+  storeSession(token, params.get("login") || "");
+  window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
+  setStatus("GitHub sign-in completed. Checking session...");
 }
 
 function updateAuthControls() {
@@ -63,11 +91,13 @@ function slugify(value) {
 
 async function apiFetch(path, options = {}) {
   requireAuthBase();
+  const token = getStoredSessionToken();
   const response = await fetch(`${AUTH_BASE}${path}`, {
     ...options,
     credentials: "include",
     headers: {
       Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {})
     }
   });
@@ -184,19 +214,25 @@ async function checkSession() {
   }
 
   try {
+    const hadStoredToken = Boolean(getStoredSessionToken());
     const session = await apiFetch("/session");
     oauthConfigured = Boolean(session.oauthConfigured);
     signedIn = Boolean(session.authenticated);
     setSession(signedIn ? `Signed in as ${session.login}.` : "Not signed in.");
     if (!oauthConfigured) {
       setStatus("GitHub OAuth App is not configured yet. Add the Client ID and Client Secret to the Worker.");
+    } else if (!signedIn && hadStoredToken) {
+      clearStoredSession();
+      setStatus("Session expired. Sign in with GitHub again.");
     } else if (signedIn) {
       setStatus("Signed in. You can load, edit, and publish homepage content.");
     }
   } catch (error) {
     signedIn = false;
-    oauthConfigured = false;
+    oauthConfigured = Boolean(AUTH_BASE);
+    clearStoredSession();
     setSession("Not signed in.");
+    setStatus("Session expired or unavailable. Sign in with GitHub again.");
   } finally {
     updateAuthControls();
   }
@@ -210,7 +246,9 @@ function githubLogin() {
 
   try {
     requireAuthBase();
-    window.location.href = `${AUTH_BASE}/login?return_to=${encodeURIComponent(window.location.href)}`;
+    const returnUrl = new URL(window.location.href);
+    returnUrl.hash = "";
+    window.location.href = `${AUTH_BASE}/login?return_to=${encodeURIComponent(returnUrl.toString())}`;
   } catch (error) {
     setStatus(error.message);
   }
@@ -286,11 +324,15 @@ $("#github-login").addEventListener("click", githubLogin);
 $("#logout").addEventListener("click", async () => {
   try {
     await apiFetch("/logout", { method: "POST" });
+    clearStoredSession();
     signedIn = false;
     updateAuthControls();
     setSession("Signed out.");
     setStatus("Signed out.");
   } catch (error) {
+    clearStoredSession();
+    signedIn = false;
+    updateAuthControls();
     setStatus(`Sign out failed:\n${error.message}`);
   }
 });
@@ -304,6 +346,7 @@ $("#add-section").addEventListener("click", () => addSection());
 form.addEventListener("submit", publish);
 
 updateAuthControls();
+captureOAuthSessionFromUrl();
 
 fetch("../content.json", { cache: "no-store" })
   .then((response) => response.json())
