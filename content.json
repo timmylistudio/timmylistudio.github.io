@@ -41,11 +41,11 @@
     {
       "id": "interests",
       "title": "Interests",
-      "type": "list",
+      "type": "paragraphs",
       "items": [
-        "Vibe Coding",
-        "Data privacy and security research in general, AI security and privacy",
-        "Tennis 🎾"
+        "💡 Vibe Coding (Yes, include this page)",
+        "🤖 Data privacy and security research in general, AI security and privacy",
+        "🎾 Tennis"
       ]
     },
     {
