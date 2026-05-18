@@ -146,10 +146,18 @@ function addSection(section = { id: "", title: "", type: "paragraphs", items: []
   $("#sections-list").append(node);
 }
 
+function normalizeEmails(profile) {
+  const emails = Array.isArray(profile?.emails)
+    ? profile.emails
+    : String(profile?.email || "").split(/\r?\n/);
+
+  return emails.map((item) => String(item || "").trim()).filter(Boolean);
+}
+
 function fillEditor(content) {
   currentContent = content;
   form.elements.name.value = content.profile?.name || "";
-  form.elements.email.value = content.profile?.email || "";
+  form.elements.email.value = normalizeEmails(content.profile).join("\n");
   form.elements.photo.value = content.profile?.photo || "";
   form.elements.lastUpdated.value = content.site?.lastUpdated || "";
   form.elements.version.value = content.site?.version || "";
@@ -184,7 +192,10 @@ function collectEditor() {
     .filter((section) => section.title && section.items.length);
 
   const name = form.elements.name.value.trim();
-  const email = form.elements.email.value.trim();
+  const emails = form.elements.email.value
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
   const photo = uploadedPhotoPath || form.elements.photo.value.trim();
 
   return {
@@ -196,7 +207,8 @@ function collectEditor() {
     },
     profile: {
       name,
-      email,
+      email: emails[0] || "",
+      emails,
       photo,
       photoAlt: name
     },
@@ -340,7 +352,7 @@ fetch("../content.json", { cache: "no-store" })
   .catch(() => {
     fillEditor({
       site: { lastUpdated: "", version: "" },
-      profile: { name: "", email: "", photo: "" },
+      profile: { name: "", email: "", emails: [], photo: "" },
       links: [],
       sections: []
     });

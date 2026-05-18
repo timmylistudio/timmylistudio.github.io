@@ -8,6 +8,9 @@
   "profile": {
     "name": "Timmy (Anqi) Li",
     "email": "timmyli [at] umich.edu",
+    "emails": [
+      "timmyli [at] umich.edu"
+    ],
     "photo": "",
     "photoAlt": "Timmy (Anqi) Li"
   },
@@ -46,6 +49,7 @@
       "title": "Interests",
       "type": "paragraphs",
       "items": [
+        "🧩 Innovative product",
         "🤖 Data privacy and security research in general, AI security and privacy",
         "💡 Vibe Coding (Yes, also this page)",
         "🎾 Tennis"

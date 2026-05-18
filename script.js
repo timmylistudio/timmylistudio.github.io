@@ -41,6 +41,17 @@
       )
       .join('<span class="link-separator">/</span>');
 
+  const normalizeEmails = (profile) => {
+    const emails = Array.isArray(profile?.emails)
+      ? profile.emails
+      : String(profile?.email || "").split(/\r?\n/);
+
+    return emails.map((item) => String(item || "").trim()).filter(Boolean);
+  };
+
+  const renderEmails = (emails) =>
+    emails.map((item) => `<span class="email-item">${escapeHtml(item)}</span>`).join("");
+
   const renderNav = (sections) =>
     sections
       .map((section) => `[<a href="#${escapeHtml(section.id)}">${escapeHtml(section.title)}</a>]`)
@@ -94,11 +105,12 @@
     const footer = document.querySelector('[data-field="footer"]');
     const adminLink = footer?.querySelector(".admin-link") || createAdminLink();
     const photo = document.querySelector('[data-field="photo"]');
+    const profileEmails = normalizeEmails(content.profile);
 
     document.title = content.site?.title || content.profile?.name || document.title;
     if (name) name.textContent = content.profile?.name || "";
     if (email) {
-      email.textContent = content.profile?.email || "";
+      email.innerHTML = renderEmails(profileEmails);
     }
     if (links) links.innerHTML = renderInlineLinks(content.links || []);
     if (nav) nav.innerHTML = renderNav(content.sections || []);

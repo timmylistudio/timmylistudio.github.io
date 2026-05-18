@@ -34,6 +34,30 @@ p {
   margin: 7px 0;
 }
 
+.email-line {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 6px;
+  align-items: baseline;
+}
+
+.email-list {
+  display: inline-flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  column-gap: 8px;
+}
+
+.email-item {
+  overflow-wrap: anywhere;
+}
+
+.email-item + .email-item::before {
+  content: "/";
+  margin-right: 8px;
+  color: #111;
+}
+
 ul {
   margin: 8px 0 0 22px;
   padding: 0;
