@@ -14,10 +14,32 @@
       .replace(/\son[a-z]+='[^']*'/gi, "")
       .replace(/\sjavascript:/gi, "");
 
+  const linkIcon = (link) => {
+    const label = String(link?.label || "").toLowerCase();
+    const url = String(link?.url || "").toLowerCase();
+
+    if (label.includes("github") || url.includes("github.com")) {
+      return '<span class="link-icon icon-github" aria-hidden="true">GH</span>';
+    }
+    if (label.includes("linkedin") || url.includes("linkedin.com")) {
+      return '<span class="link-icon icon-linkedin" aria-hidden="true">in</span>';
+    }
+    if (label.includes("weibo") || url.includes("weibo.com")) {
+      return '<span class="link-icon icon-weibo" aria-hidden="true">W</span>';
+    }
+    if (label.includes("michigan") || url.includes("michiganross.umich.edu")) {
+      return '<span class="link-icon icon-michigan" aria-hidden="true">M</span>';
+    }
+    return "";
+  };
+
   const renderInlineLinks = (links) =>
     links
-      .map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`)
-      .join(" / ");
+      .map(
+        (link) =>
+          `<a class="social-link" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${linkIcon(link)}<span>${escapeHtml(link.label)}</span></a>`
+      )
+      .join('<span class="link-separator">/</span>');
 
   const renderNav = (sections) =>
     sections
