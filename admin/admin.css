@@ -25,6 +25,13 @@ body {
   padding: 32px 0 48px;
 }
 
+.login-shell {
+  display: grid;
+  width: min(520px, calc(100% - 32px));
+  min-height: 100vh;
+  align-content: center;
+}
+
 header,
 .panel,
 #status {
@@ -109,6 +116,11 @@ button,
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 button.secondary,
 .item-row button {
   background: #fff;
@@ -121,6 +133,14 @@ button.secondary,
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 12px;
+}
+
+.login-panel .actions {
+  display: grid;
+}
+
+.login-panel button {
+  width: 100%;
 }
 
 .session-status {
@@ -150,6 +170,10 @@ button.secondary,
   border-radius: 8px;
   color: #d7f7e7;
   white-space: pre-wrap;
+}
+
+#status:empty {
+  display: none;
 }
 
 @media (max-width: 700px) {

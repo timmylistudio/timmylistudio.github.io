@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Homepage Admin Editor</title>
+    <link rel="stylesheet" href="admin.css">
+  </head>
+  <body>
+    <main class="admin-shell">
+      <header>
+        <p class="kicker">timmylistudio.github.io</p>
+        <h1>Homepage Admin</h1>
+        <p>Edit the homepage content, upload a profile picture, and publish changes to GitHub Pages.</p>
+      </header>
+
+      <section class="panel">
+        <h2>Admin Portal</h2>
+        <div class="actions">
+          <button id="load-content" type="button">Load from GitHub</button>
+          <button id="logout" type="button" class="secondary">Sign out</button>
+        </div>
+        <p id="session-status" class="session-status">Checking login...</p>
+      </section>
+
+      <form id="editor" class="panel">
+        <h2>Profile</h2>
+        <div class="grid">
+          <label>
+            Name
+            <input name="name" required>
+          </label>
+          <label>
+            Email
+            <input name="email" type="text" required>
+          </label>
+          <label>
+            Last updated
+            <input name="lastUpdated" placeholder="2026.05">
+          </label>
+          <label>
+            Version
+            <input name="version" placeholder="1.2">
+          </label>
+        </div>
+
+        <label>
+          Profile photo path
+          <input name="photo" placeholder="assets/uploads/profile.jpg">
+        </label>
+        <label>
+          Upload profile picture
+          <input id="photo-upload" type="file" accept="image/*">
+        </label>
+
+        <h2>Links</h2>
+        <div id="links-list" class="stack"></div>
+        <button id="add-link" type="button" class="secondary">Add link</button>
+
+        <h2>Sections</h2>
+        <p class="help">
+          Put each paragraph or bullet on a new line. You can use simple links
+          like <code>&lt;a href="https://example.com"&gt;Example&lt;/a&gt;</code>.
+        </p>
+        <div id="sections-list" class="stack"></div>
+        <button id="add-section" type="button" class="secondary">Add section</button>
+
+        <div class="publish-bar">
+          <button type="submit">Publish changes</button>
+          <a href="../" target="_blank" rel="noopener noreferrer">Open site</a>
+        </div>
+      </form>
+
+      <pre id="status" aria-live="polite"></pre>
+    </main>
+
+    <template id="link-template">
+      <article class="item-row">
+        <label>
+          Label
+          <input data-link="label">
+        </label>
+        <label>
+          URL
+          <input data-link="url">
+        </label>
+        <button type="button" data-remove>Remove</button>
+      </article>
+    </template>
+
+    <template id="section-template">
+      <article class="item-row section-editor">
+        <div class="grid">
+          <label>
+            ID
+            <input data-section="id" placeholder="bio">
+          </label>
+          <label>
+            Title
+            <input data-section="title" placeholder="Bio">
+          </label>
+          <label>
+            Type
+            <select data-section="type">
+              <option value="paragraphs">Paragraphs</option>
+              <option value="list">List</option>
+            </select>
+          </label>
+        </div>
+        <label>
+          Content
+          <textarea data-section="items" rows="5"></textarea>
+        </label>
+        <button type="button" data-remove>Remove section</button>
+      </article>
+    </template>
+
+    <script src="config.js?v=20260517-oauth"></script>
+    <script src="admin.js?v=20260517-editorpage"></script>
+  </body>
+</html>

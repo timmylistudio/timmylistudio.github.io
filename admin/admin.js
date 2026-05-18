@@ -4,6 +4,7 @@ const BRANCH = "main";
 const AUTH_BASE = (window.HOMEPAGE_ADMIN_CONFIG?.authBaseUrl || "").replace(/\/$/, "");
 const SESSION_STORAGE_KEY = "timmylistudio_admin_session";
 const LOGIN_STORAGE_KEY = "timmylistudio_admin_login";
+const LOGIN_PAGE = "index.html";
 
 let currentContent = null;
 let contentSha = null;
@@ -15,7 +16,6 @@ const $ = (selector) => document.querySelector(selector);
 const statusBox = $("#status");
 const sessionStatus = $("#session-status");
 const form = $("#editor");
-const githubLoginButton = $("#github-login");
 const logoutButton = $("#logout");
 const loadContentButton = $("#load-content");
 
@@ -41,6 +41,10 @@ function clearStoredSession() {
   localStorage.removeItem(LOGIN_STORAGE_KEY);
 }
 
+function redirectToLogin() {
+  window.location.replace(new URL(LOGIN_PAGE, window.location.href).toString());
+}
+
 function captureOAuthSessionFromUrl() {
   if (!window.location.hash) return;
 
@@ -54,8 +58,6 @@ function captureOAuthSessionFromUrl() {
 }
 
 function updateAuthControls() {
-  githubLoginButton.disabled = signedIn || !oauthConfigured;
-  githubLoginButton.textContent = signedIn ? "Signed in with GitHub" : "Sign in with GitHub";
   logoutButton.disabled = !signedIn;
   loadContentButton.disabled = !signedIn;
 }
@@ -210,6 +212,7 @@ async function checkSession() {
     setSession("GitHub OAuth is not configured.");
     setStatus("Set the GitHub OAuth App client ID and secret in the Worker before signing in.");
     updateAuthControls();
+    redirectToLogin();
     return;
   }
 
@@ -223,34 +226,20 @@ async function checkSession() {
       setStatus("GitHub OAuth App is not configured yet. Add the Client ID and Client Secret to the Worker.");
     } else if (!signedIn && hadStoredToken) {
       clearStoredSession();
-      setStatus("Session expired. Sign in with GitHub again.");
+      redirectToLogin();
     } else if (signedIn) {
       setStatus("Signed in. You can load, edit, and publish homepage content.");
+    } else {
+      redirectToLogin();
     }
   } catch (error) {
     signedIn = false;
     oauthConfigured = Boolean(AUTH_BASE);
     clearStoredSession();
     setSession("Not signed in.");
-    setStatus("Session expired or unavailable. Sign in with GitHub again.");
+    redirectToLogin();
   } finally {
     updateAuthControls();
-  }
-}
-
-function githubLogin() {
-  if (!oauthConfigured) {
-    setStatus("GitHub OAuth App is not configured yet. Add the Client ID and Client Secret to the Worker.");
-    return;
-  }
-
-  try {
-    requireAuthBase();
-    const returnUrl = new URL(window.location.href);
-    returnUrl.hash = "";
-    window.location.href = `${AUTH_BASE}/login?return_to=${encodeURIComponent(returnUrl.toString())}`;
-  } catch (error) {
-    setStatus(error.message);
   }
 }
 
@@ -319,21 +308,18 @@ async function publish(event) {
   }
 }
 
-$("#github-login").addEventListener("click", githubLogin);
-
 $("#logout").addEventListener("click", async () => {
   try {
     await apiFetch("/logout", { method: "POST" });
     clearStoredSession();
     signedIn = false;
     updateAuthControls();
-    setSession("Signed out.");
-    setStatus("Signed out.");
+    redirectToLogin();
   } catch (error) {
     clearStoredSession();
     signedIn = false;
     updateAuthControls();
-    setStatus(`Sign out failed:\n${error.message}`);
+    redirectToLogin();
   }
 });
 
