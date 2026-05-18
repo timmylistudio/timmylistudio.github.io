@@ -70,6 +70,10 @@ header p:not(.kicker),
   gap: 14px;
 }
 
+.profile-grid {
+  align-items: start;
+}
+
 .stack {
   display: grid;
   gap: 12px;
@@ -97,6 +101,16 @@ textarea {
 
 textarea {
   resize: vertical;
+}
+
+.profile-control {
+  height: 74px;
+}
+
+textarea.profile-control {
+  max-height: 74px;
+  overflow-y: hidden;
+  resize: none;
 }
 
 button,

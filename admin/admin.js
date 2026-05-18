@@ -5,6 +5,7 @@ const AUTH_BASE = (window.HOMEPAGE_ADMIN_CONFIG?.authBaseUrl || "").replace(/\/$
 const SESSION_STORAGE_KEY = "timmylistudio_admin_session";
 const LOGIN_STORAGE_KEY = "timmylistudio_admin_login";
 const LOGIN_PAGE = "index.html";
+const EMAIL_LINE_LIMIT = 2;
 
 let currentContent = null;
 let contentSha = null;
@@ -154,10 +155,21 @@ function normalizeEmails(profile) {
   return emails.map((item) => String(item || "").trim()).filter(Boolean);
 }
 
+function limitEmailLines() {
+  const field = form.elements.email;
+  const lines = field.value.replace(/\r\n/g, "\n").split("\n");
+  if (lines.length <= EMAIL_LINE_LIMIT) return;
+
+  const cursor = field.selectionStart;
+  field.value = lines.slice(0, EMAIL_LINE_LIMIT).join("\n");
+  const nextCursor = Math.min(cursor, field.value.length);
+  field.setSelectionRange(nextCursor, nextCursor);
+}
+
 function fillEditor(content) {
   currentContent = content;
   form.elements.name.value = content.profile?.name || "";
-  form.elements.email.value = normalizeEmails(content.profile).join("\n");
+  form.elements.email.value = normalizeEmails(content.profile).slice(0, EMAIL_LINE_LIMIT).join("\n");
   form.elements.photo.value = content.profile?.photo || "";
   form.elements.lastUpdated.value = content.site?.lastUpdated || "";
   form.elements.version.value = content.site?.version || "";
@@ -195,7 +207,8 @@ function collectEditor() {
   const emails = form.elements.email.value
     .split(/\r?\n/)
     .map((item) => item.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, EMAIL_LINE_LIMIT);
   const photo = uploadedPhotoPath || form.elements.photo.value.trim();
 
   return {
@@ -341,6 +354,7 @@ $("#load-content").addEventListener("click", () => {
 
 $("#add-link").addEventListener("click", () => addLink());
 $("#add-section").addEventListener("click", () => addSection());
+form.elements.email.addEventListener("input", limitEmailLines);
 form.addEventListener("submit", publish);
 
 updateAuthControls();

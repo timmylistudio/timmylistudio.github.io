@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Homepage Admin Editor</title>
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin.css?v=20260518-profile-fields">
   </head>
   <body>
     <main class="admin-shell">
@@ -25,14 +25,14 @@
 
       <form id="editor" class="panel">
         <h2>Profile</h2>
-        <div class="grid">
-          <label>
+        <div class="grid profile-grid">
+          <label class="profile-field">
             Name
-            <input name="name" required>
+            <input class="profile-control" name="name" required>
           </label>
-          <label>
+          <label class="profile-field">
             Email addresses
-            <textarea name="email" rows="3" placeholder="One email per line" required></textarea>
+            <textarea class="profile-control" name="email" rows="2" placeholder="One email per line" required></textarea>
           </label>
           <label>
             Last updated
@@ -116,6 +116,6 @@
     </template>
 
     <script src="config.js?v=20260517-oauth"></script>
-    <script src="admin.js?v=20260518-emails"></script>
+    <script src="admin.js?v=20260518-email-limit"></script>
   </body>
 </html>
