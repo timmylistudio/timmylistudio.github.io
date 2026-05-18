@@ -35,27 +35,26 @@ p {
 }
 
 .email-line {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
   column-gap: 6px;
-  align-items: baseline;
+  align-items: start;
+}
+
+.email-label {
+  color: #111;
+  font-weight: 700;
 }
 
 .email-list {
-  display: inline-flex;
+  display: grid;
   min-width: 0;
-  flex-wrap: wrap;
-  column-gap: 8px;
+  color: #0645ad;
 }
 
 .email-item {
+  display: block;
   overflow-wrap: anywhere;
-}
-
-.email-item + .email-item::before {
-  content: "/";
-  margin-right: 8px;
-  color: #111;
 }
 
 ul {
