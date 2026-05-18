@@ -91,6 +91,13 @@ a:hover {
   border: 1px solid #d8d8d8;
 }
 
+.profile-header .email-line,
+.profile-header .link-line,
+.profile-header .section-nav {
+  margin: 8px 0;
+  line-height: 1.45;
+}
+
 .link-line {
   display: flex;
   flex-wrap: wrap;
@@ -134,10 +141,6 @@ a:hover {
 
 .section-nav {
   word-spacing: 2px;
-}
-
-.section-nav {
-  margin-top: 16px;
 }
 
 footer {
