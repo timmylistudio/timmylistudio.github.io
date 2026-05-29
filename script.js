@@ -130,3 +130,40 @@
     makeLinksOpenInNewTabs();
   }
 })();
+
+(function trackVisit() {
+  const endpoint = "https://timmylistudio-homepage-auth.timmylistudio.workers.dev/track";
+  const visitorKey = "timmylistudio_visitor_id";
+
+  if (navigator.doNotTrack === "1" || window.doNotTrack === "1") return;
+
+  try {
+    let visitorId = localStorage.getItem(visitorKey);
+    if (!visitorId) {
+      visitorId = crypto.randomUUID();
+      localStorage.setItem(visitorKey, visitorId);
+    }
+
+    const payload = {
+      visitorId,
+      path: `${window.location.pathname}${window.location.search}`,
+      referrer: document.referrer,
+      title: document.title,
+      language: navigator.language || "",
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+      screen: window.screen ? `${window.screen.width}x${window.screen.height}` : ""
+    };
+
+    fetch(endpoint, {
+      method: "POST",
+      mode: "cors",
+      keepalive: true,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+  } catch (error) {
+    // Tracking should never affect the homepage.
+  }
+})();

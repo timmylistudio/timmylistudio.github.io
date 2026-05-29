@@ -8,3 +8,8 @@ ADMIN_ORIGIN = "https://timmylistudio.github.io"
 ALLOWED_LOGIN = "timmylistudio"
 GITHUB_OWNER = "timmylistudio"
 GITHUB_REPO = "timmylistudio.github.io"
+ANALYTICS_TIMEZONE = "America/New_York"
+
+[[kv_namespaces]]
+binding = "ANALYTICS"
+id = "8e8fcce35b7c466388478a7641ec44a0"

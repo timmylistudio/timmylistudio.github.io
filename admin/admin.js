@@ -19,6 +19,9 @@ const sessionStatus = $("#session-status");
 const form = $("#editor");
 const logoutButton = $("#logout");
 const loadContentButton = $("#load-content");
+const refreshAnalyticsButton = $("#refresh-analytics");
+const analyticsSummary = $("#analytics-summary");
+const analyticsVisits = $("#analytics-visits");
 
 function setStatus(message) {
   statusBox.textContent = message;
@@ -26,6 +29,15 @@ function setStatus(message) {
 
 function setSession(message) {
   sessionStatus.textContent = message;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function getStoredSessionToken() {
@@ -61,6 +73,7 @@ function captureOAuthSessionFromUrl() {
 function updateAuthControls() {
   logoutButton.disabled = !signedIn;
   loadContentButton.disabled = !signedIn;
+  if (refreshAnalyticsButton) refreshAnalyticsButton.disabled = !signedIn;
 }
 
 function requireAuthBase() {
@@ -254,6 +267,7 @@ async function checkSession() {
       redirectToLogin();
     } else if (signedIn) {
       setStatus("Signed in. You can load, edit, and publish homepage content.");
+      loadAnalytics();
     } else {
       redirectToLogin();
     }
@@ -280,6 +294,91 @@ async function loadContent() {
   const content = JSON.parse(decodeBase64Unicode(file.content));
   fillEditor(content);
   setStatus("Loaded content.json.");
+}
+
+function formatVisitTime(value) {
+  if (!value) return "";
+
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(new Date(value));
+  } catch (error) {
+    return value;
+  }
+}
+
+function formatPlace(visit) {
+  return [visit.city, visit.region, visit.country].filter(Boolean).join(", ") || "Unknown";
+}
+
+function renderAnalytics(data) {
+  const summary = data.summary || {};
+  if (analyticsSummary) {
+    analyticsSummary.innerHTML = `
+      <div class="metric-card">
+        <span>Total visits</span>
+        <strong>${escapeHtml(summary.total || 0)}</strong>
+      </div>
+      <div class="metric-card">
+        <span>Unique visitors</span>
+        <strong>${escapeHtml(summary.uniqueVisitors || 0)}</strong>
+      </div>
+      <div class="metric-card">
+        <span>Today</span>
+        <strong>${escapeHtml(summary.today || 0)}</strong>
+      </div>
+    `;
+  }
+
+  if (!analyticsVisits) return;
+
+  const visits = data.recent || [];
+  if (!data.configured) {
+    analyticsVisits.innerHTML = '<tr><td colspan="6">Visitor tracking storage is not configured yet.</td></tr>';
+    return;
+  }
+  if (!visits.length) {
+    analyticsVisits.innerHTML = '<tr><td colspan="6">No visits recorded yet.</td></tr>';
+    return;
+  }
+
+  analyticsVisits.innerHTML = visits
+    .map(
+      (visit) => `
+        <tr>
+          <td>${escapeHtml(formatVisitTime(visit.at))}</td>
+          <td><span class="visitor-id">${escapeHtml(visit.visitor)}</span></td>
+          <td>${escapeHtml(formatPlace(visit))}</td>
+          <td>${escapeHtml(visit.path || "/")}</td>
+          <td class="muted-cell">${escapeHtml(visit.referrer || "Direct")}</td>
+          <td>${escapeHtml([visit.browser, visit.device].filter(Boolean).join(" / "))}</td>
+        </tr>
+      `
+    )
+    .join("");
+}
+
+async function loadAnalytics() {
+  if (!signedIn) {
+    setStatus("Sign in with GitHub first, then refresh visitors.");
+    return;
+  }
+
+  if (refreshAnalyticsButton) refreshAnalyticsButton.disabled = true;
+  try {
+    const analytics = await apiFetch("/analytics?limit=50");
+    renderAnalytics(analytics);
+  } catch (error) {
+    if (analyticsVisits) {
+      analyticsVisits.innerHTML = `<tr><td colspan="6">Unable to load visitor data: ${escapeHtml(error.message)}</td></tr>`;
+    }
+  } finally {
+    if (refreshAnalyticsButton) refreshAnalyticsButton.disabled = !signedIn;
+  }
 }
 
 async function uploadPhotoIfNeeded() {
@@ -352,6 +451,11 @@ $("#load-content").addEventListener("click", () => {
   loadContent().catch((error) => setStatus(`Load failed:\n${error.message}`));
 });
 
+if (refreshAnalyticsButton) {
+  refreshAnalyticsButton.addEventListener("click", () => {
+    loadAnalytics().catch((error) => setStatus(`Visitor tracking failed:\n${error.message}`));
+  });
+}
 $("#add-link").addEventListener("click", () => addLink());
 $("#add-section").addEventListener("click", () => addSection());
 form.elements.email.addEventListener("input", limitEmailLines);

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Homepage Admin Editor</title>
-    <link rel="stylesheet" href="admin.css?v=20260518-profile-fields">
+    <link rel="stylesheet" href="admin.css?v=20260528-analytics">
   </head>
   <body>
     <main class="admin-shell">
@@ -18,9 +18,48 @@
         <h2>Admin Portal</h2>
         <div class="actions">
           <button id="load-content" type="button">Load from GitHub</button>
+          <button id="refresh-analytics" type="button" class="secondary">Refresh visitors</button>
           <button id="logout" type="button" class="secondary">Sign out</button>
         </div>
         <p id="session-status" class="session-status">Checking login...</p>
+      </section>
+
+      <section class="panel analytics-panel">
+        <h2>Visitor Tracking</h2>
+        <p class="help">Anonymous visits only. This does not show real names or raw IP addresses.</p>
+        <div id="analytics-summary" class="metric-grid">
+          <div class="metric-card">
+            <span>Total visits</span>
+            <strong>--</strong>
+          </div>
+          <div class="metric-card">
+            <span>Unique visitors</span>
+            <strong>--</strong>
+          </div>
+          <div class="metric-card">
+            <span>Today</span>
+            <strong>--</strong>
+          </div>
+        </div>
+        <div class="analytics-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Visitor</th>
+                <th>Place</th>
+                <th>Page</th>
+                <th>Source</th>
+                <th>Device</th>
+              </tr>
+            </thead>
+            <tbody id="analytics-visits">
+              <tr>
+                <td colspan="6">Sign in, then refresh visitors.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <form id="editor" class="panel">
@@ -116,6 +155,6 @@
     </template>
 
     <script src="config.js?v=20260517-oauth"></script>
-    <script src="admin.js?v=20260518-email-limit"></script>
+    <script src="admin.js?v=20260528-analytics"></script>
   </body>
 </html>
