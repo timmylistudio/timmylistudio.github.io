@@ -1,19 +1,19 @@
 {
   "site": {
-    "title": "Timmy (Anqi) Li",
-    "description": "Timmy (Anqi) Li's personal homepage.",
+    "title": "Timmy Li",
+    "description": "Timmy Li's personal homepage.",
     "lastUpdated": "2026.05",
     "version": "1.1"
   },
   "profile": {
-    "name": "Timmy (Anqi) Li",
+    "name": "Timmy Li",
     "email": "timmyli [at] umich.edu",
     "emails": [
       "timmyli [at] umich.edu",
       "anqitimmyli [at] gmail.com"
     ],
-    "photo": "",
-    "photoAlt": "Timmy (Anqi) Li"
+    "photo": "assets/uploads/profile-1779111771294.jpg",
+    "photoAlt": "Timmy Li"
   },
   "links": [
     {
@@ -50,7 +50,7 @@
       "title": "Interests",
       "type": "paragraphs",
       "items": [
-        "🧩 Innovative product",
+        "🧩 Innovative products",
         "🤖 Data privacy and security research in general, AI security and privacy",
         "💡 Vibe Coding (Yes, also this page)",
         "🎾 Tennis"
@@ -61,7 +61,9 @@
       "title": "Projects",
       "type": "list",
       "items": [
-        "Tennis Coach Pro - <a href=\"https://github.com/timmylistudio/Tennis-Coach-Pro\">GitHub repo</a>",
+        "Vista Calendar - personal calendar designed for deep work and procrastination, transforming linear deadlines into a panoramic, stress-free visual flow that effortlessly bridges long-term vision, daily focus, and past backlogs. (Currently in development)",
+        "Tennis performance analysis and training app - <a href=\"https://github.com/timmylistudio/Tennis-Coach-Pro\">GitHub repo</a>",
+        "An art, design and photograph platform for young professionals - <a href=\"https://www.linkedin.com/company/yawp-/\">YAWP!</a>",
         "Personal page hosted on GitHub.io - <a href=\"https://github.com/timmylistudio/timmylistudio.github.io\">timmylistudio</a>"
       ]
     }
