@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Homepage Admin Editor</title>
-    <link rel="stylesheet" href="admin.css?v=20260530-archive-grid">
+    <link rel="stylesheet" href="admin.css?v=20260530-archive-date">
   </head>
   <body>
     <main class="admin-shell">
@@ -43,9 +43,10 @@
         </div>
         <div class="archive-toolbar">
           <label class="archive-date-label" for="analytics-date">Archive date</label>
-          <select id="analytics-date">
-            <option value="">Today</option>
-          </select>
+          <div class="archive-date-controls">
+            <input id="analytics-date" type="date">
+            <button id="analytics-today" type="button" class="secondary">Today</button>
+          </div>
           <span id="analytics-date-note" class="archive-date-note">Showing selected date.</span>
         </div>
         <div class="analytics-table-wrap">
@@ -162,6 +163,6 @@
     </template>
 
     <script src="config.js?v=20260517-oauth"></script>
-    <script src="admin.js?v=20260529-archive-label"></script>
+    <script src="admin.js?v=20260530-archive-date"></script>
   </body>
 </html>

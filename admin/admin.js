@@ -23,6 +23,7 @@ const refreshAnalyticsButton = $("#refresh-analytics");
 const analyticsSummary = $("#analytics-summary");
 const analyticsVisits = $("#analytics-visits");
 const analyticsDate = $("#analytics-date");
+const analyticsTodayButton = $("#analytics-today");
 const analyticsDateNote = $("#analytics-date-note");
 
 let selectedAnalyticsDate = "";
@@ -319,21 +320,14 @@ function formatPlace(visit) {
   return [visit.city, visit.region, visit.country].filter(Boolean).join(", ") || "Unknown";
 }
 
-function formatArchiveDate(date, today) {
-  if (!date) return "Today";
-  return date === today ? "Today" : date;
-}
-
 function renderArchiveDates(data) {
   if (!analyticsDate) return;
 
   const dates = data.dates || [];
   const selectedDate = data.date || data.today || "";
-  const options = dates.length ? dates : [selectedDate].filter(Boolean);
-  analyticsDate.innerHTML = options
-    .map((date) => `<option value="${escapeHtml(date)}">${escapeHtml(formatArchiveDate(date, data.today))}</option>`)
-    .join("");
   analyticsDate.value = selectedDate;
+  analyticsDate.max = data.today || "";
+  if (dates.length) analyticsDate.min = dates[dates.length - 1];
   selectedAnalyticsDate = selectedDate;
 
   if (analyticsDateNote) {
@@ -492,6 +486,12 @@ if (refreshAnalyticsButton) {
 if (analyticsDate) {
   analyticsDate.addEventListener("change", () => {
     selectedAnalyticsDate = analyticsDate.value;
+    loadAnalytics().catch((error) => setStatus(`Visitor tracking failed:\n${error.message}`));
+  });
+}
+if (analyticsTodayButton) {
+  analyticsTodayButton.addEventListener("click", () => {
+    selectedAnalyticsDate = "";
     loadAnalytics().catch((error) => setStatus(`Visitor tracking failed:\n${error.message}`));
   });
 }

@@ -199,10 +199,10 @@ button.secondary,
 
 .archive-toolbar {
   display: grid;
-  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  grid-template-columns: minmax(250px, 340px) minmax(0, 1fr);
   grid-template-areas:
     "label label"
-    "select note";
+    "controls note";
   column-gap: 20px;
   row-gap: 6px;
   align-items: center;
@@ -215,8 +215,17 @@ button.secondary,
   margin: 0;
 }
 
-#analytics-date {
-  grid-area: select;
+.archive-date-controls {
+  grid-area: controls;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.archive-date-controls button {
+  min-height: 42px;
+  padding: 0 12px;
 }
 
 .archive-date-note {
@@ -306,12 +315,14 @@ tr:last-child td {
   .metric-grid {
     grid-template-columns: 1fr;
   }
+}
 
+@media (max-width: 520px) {
   .archive-toolbar {
     grid-template-columns: 1fr;
     grid-template-areas:
       "label"
-      "select"
+      "controls"
       "note";
   }
 }
