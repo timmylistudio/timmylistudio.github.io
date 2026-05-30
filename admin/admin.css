@@ -201,7 +201,7 @@ button.secondary,
   display: grid;
   grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
   gap: 10px;
-  align-items: end;
+  align-items: start;
   margin: 14px 0;
 }
 
@@ -213,6 +213,7 @@ button.secondary,
   min-height: 42px;
   display: inline-flex;
   align-items: center;
+  align-self: end;
   color: var(--muted);
   font-size: 0.92rem;
   font-weight: 700;
