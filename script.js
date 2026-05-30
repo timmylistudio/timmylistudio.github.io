@@ -134,6 +134,8 @@
 (function trackVisit() {
   const endpoint = "https://timmylistudio-homepage-auth.timmylistudio.workers.dev/track";
   const visitorKey = "timmylistudio_visitor_id";
+  const lastVisitKey = "timmylistudio_last_tracked_visit";
+  const visitWindowMs = 30 * 60 * 1000;
 
   if (navigator.doNotTrack === "1" || window.doNotTrack === "1") return;
 
@@ -144,9 +146,22 @@
       localStorage.setItem(visitorKey, visitorId);
     }
 
+    const path = `${window.location.pathname}${window.location.search}`;
+    const now = Date.now();
+    let lastVisit = null;
+    try {
+      lastVisit = JSON.parse(localStorage.getItem(lastVisitKey) || "null");
+    } catch (error) {
+      localStorage.removeItem(lastVisitKey);
+    }
+    if (lastVisit?.path === path && now - Number(lastVisit.at || 0) < visitWindowMs) {
+      return;
+    }
+    localStorage.setItem(lastVisitKey, JSON.stringify({ path, at: now }));
+
     const payload = {
       visitorId,
-      path: `${window.location.pathname}${window.location.search}`,
+      path,
       referrer: document.referrer,
       title: document.title,
       language: navigator.language || "",

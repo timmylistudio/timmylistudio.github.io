@@ -7,6 +7,7 @@ const ANALYTICS_STATS_KEY = "analytics:stats";
 const ANALYTICS_ARCHIVE_INDEX_KEY = "analytics:archive:index";
 const ANALYTICS_ARCHIVE_PREFIX = "analytics/archive/";
 const ANALYTICS_EVENT_LIMIT = 500;
+const ANALYTICS_SESSION_WINDOW_MS = 30 * 60 * 1000;
 
 function json(data, status = 200, env, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -380,8 +381,28 @@ async function handleTrack(request, env) {
     firstSeen: event.at,
     count: 0
   };
+  const previousLastSeen = visitorStats.lastSeen ? Date.parse(visitorStats.lastSeen) : 0;
+  const isRepeatVisit =
+    visitorStats.lastPath === event.path &&
+    previousLastSeen &&
+    now.getTime() - previousLastSeen < ANALYTICS_SESSION_WINDOW_MS;
+
+  if (isRepeatVisit) {
+    visitorStats.lastSeen = event.at;
+    visitors[visitor] = visitorStats;
+    await env.ANALYTICS.put(
+      ANALYTICS_STATS_KEY,
+      JSON.stringify({
+        ...stats,
+        visitors: limitObjectKeys(visitors, 1000)
+      })
+    );
+    return new Response(null, { status: 204, headers: corsHeaders(env) });
+  }
+
   visitorStats.count += 1;
   visitorStats.lastSeen = event.at;
+  visitorStats.lastPath = event.path;
   visitorStats.country = country || visitorStats.country || "";
   visitorStats.region = region || visitorStats.region || "";
   visitorStats.city = city || visitorStats.city || "";
