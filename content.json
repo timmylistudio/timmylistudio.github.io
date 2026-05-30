@@ -1,19 +1,19 @@
 {
   "site": {
-    "title": "Timmy Li",
-    "description": "Timmy Li's personal homepage.",
+    "title": "Timmy Li (Anqi Li) | Michigan Ross MBA, Privacy and AI Security",
+    "description": "Personal homepage of Timmy Li (Anqi Li): Michigan Ross MBA candidate, former consultant in digital, privacy and security, and AI. CIPP and CISA certified.",
     "lastUpdated": "2026.05",
-    "version": "1.1"
+    "version": "1.2"
   },
   "profile": {
-    "name": "Timmy Li",
+    "name": "Timmy Li (Anqi Li)",
     "email": "timmyli [at] umich.edu",
     "emails": [
       "timmyli [at] umich.edu",
       "anqitimmyli [at] gmail.com"
     ],
     "photo": "assets/uploads/profile-1779111771294.jpg",
-    "photoAlt": "Timmy Li"
+    "photoAlt": "Portrait of Timmy Li (Anqi Li)"
   },
   "links": [
     {
@@ -39,6 +39,7 @@
       "title": "Bio",
       "type": "list",
       "items": [
+        "Timmy Li (also Anqi Li, Timmy Anqi Li) - Michigan Ross MBA candidate focused on innovative products, data privacy, security, and AI.",
         "Michigan Ross MBA 26'",
         "PolyU 14'",
         "Former Consultant in digital, privacy/security and AI",
