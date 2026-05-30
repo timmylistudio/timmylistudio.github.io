@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Homepage Admin Editor</title>
-    <link rel="stylesheet" href="admin.css?v=20260529-archive-align">
+    <link rel="stylesheet" href="admin.css?v=20260530-archive-grid">
   </head>
   <body>
     <main class="admin-shell">
@@ -42,13 +42,11 @@
           </div>
         </div>
         <div class="archive-toolbar">
-          <label>
-            Archive date
-            <select id="analytics-date">
-              <option value="">Today</option>
-            </select>
-          </label>
-          <span id="analytics-date-note">Showing selected date.</span>
+          <label class="archive-date-label" for="analytics-date">Archive date</label>
+          <select id="analytics-date">
+            <option value="">Today</option>
+          </select>
+          <span id="analytics-date-note" class="archive-date-note">Showing selected date.</span>
         </div>
         <div class="analytics-table-wrap">
           <table>

@@ -200,23 +200,33 @@ button.secondary,
 .archive-toolbar {
   display: grid;
   grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
-  gap: 10px;
-  align-items: start;
+  grid-template-areas:
+    "label label"
+    "select note";
+  column-gap: 20px;
+  row-gap: 6px;
+  align-items: center;
   margin: 14px 0;
 }
 
-.archive-toolbar label {
+.archive-date-label {
+  grid-area: label;
+  display: block;
   margin: 0;
 }
 
-.archive-toolbar span {
-  min-height: 42px;
+#analytics-date {
+  grid-area: select;
+}
+
+.archive-date-note {
+  grid-area: note;
   display: inline-flex;
   align-items: center;
-  align-self: end;
   color: var(--muted);
   font-size: 0.92rem;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .analytics-table-wrap {
@@ -299,5 +309,9 @@ tr:last-child td {
 
   .archive-toolbar {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "label"
+      "select"
+      "note";
   }
 }
