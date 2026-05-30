@@ -1,19 +1,19 @@
 {
   "site": {
-    "title": "Timmy Li (Anqi Li)",
-    "description": "Timmy Li (Anqi Li)'s personal homepage.",
+    "title": "Timmy Li",
+    "description": "Timmy Li's personal homepage.",
     "lastUpdated": "2026.05",
     "version": "1.2"
   },
   "profile": {
-    "name": "Timmy Li (Anqi Li)",
+    "name": "Timmy Li",
     "email": "timmyli [at] umich.edu",
     "emails": [
       "timmyli [at] umich.edu",
       "anqitimmyli [at] gmail.com"
     ],
     "photo": "assets/uploads/profile-1779111771294.jpg",
-    "photoAlt": "Timmy Li (Anqi Li)"
+    "photoAlt": "Timmy Li"
   },
   "links": [
     {
