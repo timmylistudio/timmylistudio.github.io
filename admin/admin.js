@@ -321,7 +321,7 @@ function formatPlace(visit) {
 
 function formatArchiveDate(date, today) {
   if (!date) return "Today";
-  return date === today ? `Today (${date})` : date;
+  return date === today ? "Today" : date;
 }
 
 function renderArchiveDates(data) {
@@ -339,8 +339,8 @@ function renderArchiveDates(data) {
   if (analyticsDateNote) {
     const isToday = selectedDate === data.today;
     analyticsDateNote.textContent = isToday
-      ? "Showing today's visits."
-      : `Showing archived visits for ${selectedDate}.`;
+      ? `Showing ${selectedDate}.`
+      : `Archived day: ${selectedDate}.`;
   }
 }
 
