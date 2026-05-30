@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Homepage Admin Editor</title>
-    <link rel="stylesheet" href="admin.css?v=20260528-analytics">
+    <link rel="stylesheet" href="admin.css?v=20260529-analytics-archive">
   </head>
   <body>
     <main class="admin-shell">
@@ -26,7 +26,7 @@
 
       <section class="panel analytics-panel">
         <h2>Visitor Tracking</h2>
-        <p class="help">Anonymous visits only. This does not show real names or raw IP addresses.</p>
+        <p class="help">Anonymous visits only. The table shows one day at a time; older days are kept in the archive.</p>
         <div id="analytics-summary" class="metric-grid">
           <div class="metric-card">
             <span>Total visits</span>
@@ -40,6 +40,15 @@
             <span>Today</span>
             <strong>--</strong>
           </div>
+        </div>
+        <div class="archive-toolbar">
+          <label>
+            Archive date
+            <select id="analytics-date">
+              <option value="">Today</option>
+            </select>
+          </label>
+          <span id="analytics-date-note">Showing today's visits.</span>
         </div>
         <div class="analytics-table-wrap">
           <table>
@@ -155,6 +164,6 @@
     </template>
 
     <script src="config.js?v=20260517-oauth"></script>
-    <script src="admin.js?v=20260528-analytics"></script>
+    <script src="admin.js?v=20260529-analytics-archive"></script>
   </body>
 </html>

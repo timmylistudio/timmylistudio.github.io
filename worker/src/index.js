@@ -3,9 +3,10 @@ const STATE_COOKIE = "homepage_admin_state";
 const GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
 const GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token";
 const GITHUB_API = "https://api.github.com";
-const ANALYTICS_EVENTS_KEY = "analytics:events";
 const ANALYTICS_STATS_KEY = "analytics:stats";
-const ANALYTICS_EVENT_LIMIT = 200;
+const ANALYTICS_ARCHIVE_INDEX_KEY = "analytics:archive:index";
+const ANALYTICS_ARCHIVE_PREFIX = "analytics/archive/";
+const ANALYTICS_EVENT_LIMIT = 500;
 
 function json(data, status = 200, env, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -92,6 +93,15 @@ function limitObjectKeys(object, maxKeys) {
   return Object.fromEntries(entries.slice(entries.length - maxKeys));
 }
 
+function analyticsArchiveKey(day) {
+  return `${ANALYTICS_ARCHIVE_PREFIX}${day}`;
+}
+
+function safeDateKey(value, fallback) {
+  const date = String(value || "");
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : fallback;
+}
+
 function dateKey(date, timeZone) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -101,6 +111,11 @@ function dateKey(date, timeZone) {
   }).formatToParts(date);
   const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
   return `${values.year}-${values.month}-${values.day}`;
+}
+
+function updateArchiveIndex(index, day) {
+  const days = Array.isArray(index) ? index : [];
+  return [day, ...days.filter((item) => item !== day)].slice(0, 365);
 }
 
 function getBearerToken(request) {
@@ -346,8 +361,9 @@ async function handleTrack(request, env) {
     device: deviceFromUserAgent(userAgent)
   };
 
-  const [events, stats] = await Promise.all([
-    analyticsJson(env, ANALYTICS_EVENTS_KEY, []),
+  const [dayEvents, archiveIndex, stats] = await Promise.all([
+    analyticsJson(env, analyticsArchiveKey(day), []),
+    analyticsJson(env, ANALYTICS_ARCHIVE_INDEX_KEY, []),
     analyticsJson(env, ANALYTICS_STATS_KEY, {
       total: 0,
       days: {},
@@ -357,7 +373,8 @@ async function handleTrack(request, env) {
     })
   ]);
 
-  const nextEvents = [event, ...events].slice(0, ANALYTICS_EVENT_LIMIT);
+  const nextDayEvents = [event, ...dayEvents].slice(0, ANALYTICS_EVENT_LIMIT);
+  const nextArchiveIndex = updateArchiveIndex(archiveIndex, day);
   const visitors = stats.visitors || {};
   const visitorStats = visitors[visitor] || {
     firstSeen: event.at,
@@ -387,7 +404,8 @@ async function handleTrack(request, env) {
   nextStats.referrers = limitObjectKeys(nextStats.referrers, 100);
 
   await Promise.all([
-    env.ANALYTICS.put(ANALYTICS_EVENTS_KEY, JSON.stringify(nextEvents)),
+    env.ANALYTICS.put(analyticsArchiveKey(day), JSON.stringify(nextDayEvents)),
+    env.ANALYTICS.put(ANALYTICS_ARCHIVE_INDEX_KEY, JSON.stringify(nextArchiveIndex)),
     env.ANALYTICS.put(ANALYTICS_STATS_KEY, JSON.stringify(nextStats))
   ]);
 
@@ -398,25 +416,43 @@ async function handleAnalytics(request, env) {
   const session = await getSession(request, env);
   if (!session) return json({ error: "Not signed in" }, 401, env);
 
+  const url = new URL(request.url);
+  const today = dateKey(new Date(), env.ANALYTICS_TIMEZONE || "America/New_York");
+  const selectedDate = safeDateKey(url.searchParams.get("date"), today);
   if (!env.ANALYTICS) {
-    return json({ configured: false, summary: { total: 0, uniqueVisitors: 0, today: 0 }, recent: [] }, 200, env);
+    return json(
+      {
+        configured: false,
+        date: selectedDate,
+        today,
+        dates: [],
+        summary: { total: 0, uniqueVisitors: 0, today: 0, selectedDate: 0 },
+        recent: []
+      },
+      200,
+      env
+    );
   }
 
-  const url = new URL(request.url);
-  const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 50, 1), ANALYTICS_EVENT_LIMIT);
-  const today = dateKey(new Date(), env.ANALYTICS_TIMEZONE || "America/New_York");
-  const [events, stats] = await Promise.all([
-    analyticsJson(env, ANALYTICS_EVENTS_KEY, []),
+  const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 100, 1), ANALYTICS_EVENT_LIMIT);
+  const [events, archiveIndex, stats] = await Promise.all([
+    analyticsJson(env, analyticsArchiveKey(selectedDate), []),
+    analyticsJson(env, ANALYTICS_ARCHIVE_INDEX_KEY, []),
     analyticsJson(env, ANALYTICS_STATS_KEY, { total: 0, days: {}, paths: {}, referrers: {}, visitors: {} })
   ]);
+  const dates = updateArchiveIndex(archiveIndex, today);
 
   return json(
     {
       configured: true,
+      date: selectedDate,
+      today,
+      dates,
       summary: {
         total: stats.total || 0,
         uniqueVisitors: Object.keys(stats.visitors || {}).length,
-        today: stats.days?.[today] || 0
+        today: stats.days?.[today] || 0,
+        selectedDate: stats.days?.[selectedDate] || events.length
       },
       recent: events.slice(0, limit),
       topPaths: Object.entries(stats.paths || {})

@@ -197,8 +197,30 @@ button.secondary,
   line-height: 1;
 }
 
+.archive-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  margin: 14px 0;
+}
+
+.archive-toolbar label {
+  width: min(240px, 100%);
+  margin: 0;
+}
+
+.archive-toolbar span {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .analytics-table-wrap {
-  overflow-x: auto;
+  max-height: 420px;
+  overflow: auto;
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -219,6 +241,9 @@ td {
 }
 
 th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   background: #f3f7fb;
   color: #30404e;
   font-weight: 900;

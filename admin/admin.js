@@ -22,6 +22,10 @@ const loadContentButton = $("#load-content");
 const refreshAnalyticsButton = $("#refresh-analytics");
 const analyticsSummary = $("#analytics-summary");
 const analyticsVisits = $("#analytics-visits");
+const analyticsDate = $("#analytics-date");
+const analyticsDateNote = $("#analytics-date-note");
+
+let selectedAnalyticsDate = "";
 
 function setStatus(message) {
   statusBox.textContent = message;
@@ -315,6 +319,31 @@ function formatPlace(visit) {
   return [visit.city, visit.region, visit.country].filter(Boolean).join(", ") || "Unknown";
 }
 
+function formatArchiveDate(date, today) {
+  if (!date) return "Today";
+  return date === today ? `Today (${date})` : date;
+}
+
+function renderArchiveDates(data) {
+  if (!analyticsDate) return;
+
+  const dates = data.dates || [];
+  const selectedDate = data.date || data.today || "";
+  const options = dates.length ? dates : [selectedDate].filter(Boolean);
+  analyticsDate.innerHTML = options
+    .map((date) => `<option value="${escapeHtml(date)}">${escapeHtml(formatArchiveDate(date, data.today))}</option>`)
+    .join("");
+  analyticsDate.value = selectedDate;
+  selectedAnalyticsDate = selectedDate;
+
+  if (analyticsDateNote) {
+    const isToday = selectedDate === data.today;
+    analyticsDateNote.textContent = isToday
+      ? "Showing today's visits."
+      : `Showing archived visits for ${selectedDate}.`;
+  }
+}
+
 function renderAnalytics(data) {
   const summary = data.summary || {};
   if (analyticsSummary) {
@@ -328,11 +357,13 @@ function renderAnalytics(data) {
         <strong>${escapeHtml(summary.uniqueVisitors || 0)}</strong>
       </div>
       <div class="metric-card">
-        <span>Today</span>
-        <strong>${escapeHtml(summary.today || 0)}</strong>
+        <span>${data.date === data.today ? "Today" : "Selected day"}</span>
+        <strong>${escapeHtml(summary.selectedDate ?? summary.today ?? 0)}</strong>
       </div>
     `;
   }
+
+  renderArchiveDates(data);
 
   if (!analyticsVisits) return;
 
@@ -370,7 +401,9 @@ async function loadAnalytics() {
 
   if (refreshAnalyticsButton) refreshAnalyticsButton.disabled = true;
   try {
-    const analytics = await apiFetch("/analytics?limit=50");
+    const params = new URLSearchParams({ limit: "100" });
+    if (selectedAnalyticsDate) params.set("date", selectedAnalyticsDate);
+    const analytics = await apiFetch(`/analytics?${params.toString()}`);
     renderAnalytics(analytics);
   } catch (error) {
     if (analyticsVisits) {
@@ -453,6 +486,12 @@ $("#load-content").addEventListener("click", () => {
 
 if (refreshAnalyticsButton) {
   refreshAnalyticsButton.addEventListener("click", () => {
+    loadAnalytics().catch((error) => setStatus(`Visitor tracking failed:\n${error.message}`));
+  });
+}
+if (analyticsDate) {
+  analyticsDate.addEventListener("change", () => {
+    selectedAnalyticsDate = analyticsDate.value;
     loadAnalytics().catch((error) => setStatus(`Visitor tracking failed:\n${error.message}`));
   });
 }
