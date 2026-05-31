@@ -430,6 +430,21 @@ async function uploadPhotoIfNeeded() {
   return path;
 }
 
+async function publishIndexHtml(content) {
+  const file = await githubGet("index.html");
+  if (typeof syncIndexHtml !== "function") {
+    throw new Error("index-sync.js is not loaded.");
+  }
+
+  const syncedHtml = syncIndexHtml(decodeBase64Unicode(file.content), content);
+  return githubPut(
+    "index.html",
+    encodeBase64Unicode(syncedHtml),
+    `Update homepage HTML to version ${content.site.version || "latest"}`,
+    file.sha
+  );
+}
+
 async function publish(event) {
   event.preventDefault();
   if (!signedIn) {
@@ -453,7 +468,11 @@ async function publish(event) {
     );
     contentSha = result.content.sha;
     currentContent = nextContent;
-    setStatus("Published. GitHub Pages will update in about 30-60 seconds.");
+
+    setStatus("Syncing index.html...");
+    await publishIndexHtml(nextContent);
+
+    setStatus("Published content.json and index.html. GitHub Pages will update in about 30-60 seconds.");
   } catch (error) {
     setStatus(`Publish failed:\n${error.message}`);
   }
